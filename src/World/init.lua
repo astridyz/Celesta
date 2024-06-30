@@ -1,0 +1,172 @@
+--!strict
+--!nolint UninitializedLocal
+--// Packages
+local Cleanup = require(script.Parent.Cleanup)
+
+local Types = require(script.Parent.Types)
+type World = Types.World
+type Entity = Types.Entity
+
+type Trait = Types.Trait
+type ComponentData = Types.ComponentData
+
+local function World(): World
+
+    debug.profilebegin('new world')
+
+    local Class = {
+        size = 0
+    }
+
+    local Datas = {}
+    local Traits = {}
+
+    local EntityMap = {}
+
+    function Class.scheduleTraits(traits: {Trait})
+        for _, trait in traits do
+            Traits[trait._requirements] = trait
+        end
+    end
+
+    local function createEntity(ID: Instance?)
+        Class.size += 1
+
+        local entity = ID or Class.size
+
+        EntityMap[entity] = {
+            components = {},
+            traits = {}
+        }
+
+        return entity
+    end
+
+    function Class.get(entity, ...)
+        local results = {}
+
+        for _, component in { ... } do
+            local componentData = Datas[component.name][entity]
+
+            assert(componentData)
+            
+            table.insert(results, componentData)
+        end
+
+        return table.unpack(results)
+    end
+
+    local function addComponentDataToEntity(entity: Entity, componentData)
+        local componentName = componentData._name
+
+        if not Datas[componentName] then
+            Datas[componentName] = {}
+        end
+
+        EntityMap[entity].components[componentName] = true
+        
+        Datas[componentName][entity] = componentData
+    end
+
+    local function hasComponent(entity: Entity, component)
+        return Datas[component.name][entity] and true
+    end
+
+    local function hasComponentSet(entity, componentSet)
+        for _, component in componentSet do
+
+            if not hasComponent(entity, component) then
+                return false
+            end
+        end
+
+        return true
+    end
+
+    local function applyTraits(entity: Entity)
+        debug.profilebegin('apply trait')
+
+        for componentSet, trait in Traits do
+            
+            if not hasComponentSet(entity, componentSet) then
+
+                if not trait.isApplied(entity) then
+                    continue
+                end
+
+                trait.remove(entity)
+
+                EntityMap[entity].traits[trait] = nil
+                continue
+            end
+
+            trait.apply(entity, Class)
+
+            EntityMap[entity].traits[trait] = true
+        end
+
+        debug.profileend()
+    end
+
+    function Class.spawn(...)
+        debug.profilebegin('spawn entity')
+
+        local args = { ... }
+        local entity
+
+        if typeof(args[1]) == 'Instance' then
+            entity = createEntity(args[1])
+            table.remove(args, 1)
+        else
+            entity =  createEntity()
+        end
+
+        print('Spawning entity: ', entity)
+
+        for _, componentData in args do
+            addComponentDataToEntity(entity, componentData)
+        end
+
+        applyTraits(entity)
+
+        if typeof(entity) == 'Instance' then
+            entity.Destroying:Connect(function()
+
+                Class.despawn(entity)
+            end)
+        end
+
+        debug.profileend()
+
+        return entity
+    end
+
+    function Class.despawn(entity)
+
+        for trait in EntityMap[entity].traits do
+            trait.remove(entity)
+        end
+
+        for componentName in EntityMap[entity].components do
+            local componentData = Datas[componentName][entity]
+
+            Cleanup(componentData)
+        end
+
+        EntityMap[entity] = nil
+    end
+
+    function Class.insert(entity, ...: ComponentData)
+        for _, componentData in { ... } do
+            addComponentDataToEntity(entity, componentData)
+        end
+
+        applyTraits(entity)
+    end
+
+    debug.profileend()
+
+    return Class
+end
+
+return World
