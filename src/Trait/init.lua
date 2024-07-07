@@ -25,6 +25,9 @@ local function Trait<entity>(requirements: {[any]: Component}, init: Initter<ent
     local applied = {}
 
     function Class.apply(entity, world)
+        print('Applying trait to:', entity, 'componentSet:', requirements)
+
+
         if applied[entity] then
             warn('Trying to apply twitce to the same entity')
             return
@@ -34,7 +37,7 @@ local function Trait<entity>(requirements: {[any]: Component}, init: Initter<ent
 
         table.insert(
             applied[entity],
-            task.spawn(init, world, entity, applied[entity]
+            task.spawn(init, entity, world, applied[entity]
         ))
     end
 

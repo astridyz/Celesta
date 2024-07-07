@@ -49,7 +49,7 @@ export type Trait = {
     isApplied: (Entity: unknown) -> boolean
 }
 
-export type Initter<entity> = (world: World, entity: entity, scope: Scoped<unknown>) -> ()
+export type Initter<entity> = (entity: entity, world: World, scope: Scoped<unknown>) -> ()
 
 export type Entity = number | Instance
 
@@ -66,10 +66,10 @@ export type World = {
     insert: (entity: Entity, ...ComponentData) -> ()
 }
 
-export type Get = ((entity: Entity, component: Component) -> ComponentData)
-& ((entity: Entity, component1: Component, component2: Component) -> (ComponentData, ComponentData))
-& ((entity: Entity, component1: Component, component2: Component, component3: Component) -> (ComponentData, ComponentData, ComponentData))
-& ((entity: Entity, component1: Component, component2: Component, component3: Component, component4: Component) -> (ComponentData, ComponentData, ComponentData, ComponentData))
-& ((entity: Entity, component1: Component, component2: Component, component3: Component, component4: Component, component5: Component) -> (ComponentData, ComponentData, ComponentData, ComponentData, ComponentData))
+export type Get = ((entity: Entity, component: Component) -> ComponentData & Scoped<unknown>)
+& ((entity: Entity, component1: Component, component2: Component) -> (ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>))
+& ((entity: Entity, component1: Component, component2: Component, component3: Component) -> (ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>))
+& ((entity: Entity, component1: Component, component2: Component, component3: Component, component4: Component) -> (ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>))
+& ((entity: Entity, component1: Component, component2: Component, component3: Component, component4: Component, component5: Component) -> (ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>))
 
 return {}

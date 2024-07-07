@@ -19,6 +19,8 @@ local Trait = Celesta.Trait({Component}, function(world, entity, scope)
     print('Trait applied to:', entity)
 
 end)
+
+World.scheduleTraits({Trait})
 ```
 
 Spawn entities with sets of components

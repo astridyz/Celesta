@@ -12,9 +12,11 @@ local function ToValue(data: {[string]: any}): Types.ComponentData
 
     for index, value in data do
 
+        --[[
         if typeof(value) == 'table' then
             warn('Fields of type table in component data wont receive values.')
         end
+        ]]
 
         newData[index] = Value(value)
     end

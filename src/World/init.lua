@@ -29,6 +29,16 @@ local function World(): World
         end
     end
 
+    local function scheduleComponent(component)
+        local componentName = component._name or component.name
+
+        assert(componentName)
+
+        if not Datas[componentName] then
+            Datas[componentName] = {}
+        end
+    end
+
     local function createEntity(ID: Instance?)
         Class.size += 1
 
@@ -43,6 +53,11 @@ local function World(): World
     end
 
     function Class.get(entity, ...)
+        
+        if not EntityMap[entity] then
+            return
+        end
+
         local results = {}
 
         for _, component in { ... } do
@@ -59,9 +74,9 @@ local function World(): World
     local function addComponentDataToEntity(entity: Entity, componentData)
         local componentName = componentData._name
 
-        if not Datas[componentName] then
-            Datas[componentName] = {}
-        end
+        print('Adding component:', componentName)
+
+        scheduleComponent(componentData)
 
         EntityMap[entity].components[componentName] = true
         
@@ -69,6 +84,8 @@ local function World(): World
     end
 
     local function hasComponent(entity: Entity, component)
+        scheduleComponent(component)
+
         return Datas[component.name][entity] and true
     end
 
@@ -86,20 +103,31 @@ local function World(): World
     local function applyTraits(entity: Entity)
         debug.profilebegin('apply trait')
 
+        print('Starting to apply to:', entity)
+
         for componentSet, trait in Traits do
             
             if not hasComponentSet(entity, componentSet) then
+
+                print(entity, 'doesnt have the component set', componentSet)
 
                 if not trait.isApplied(entity) then
                     continue
                 end
 
+                print('Removing trait from:', entity)
+
                 trait.remove(entity)
 
                 EntityMap[entity].traits[trait] = nil
+
                 continue
             end
 
+            if trait.isApplied(entity) then
+                continue
+            end
+            
             trait.apply(entity, Class)
 
             EntityMap[entity].traits[trait] = true
@@ -127,7 +155,7 @@ local function World(): World
             addComponentDataToEntity(entity, componentData)
         end
 
-        applyTraits(entity)
+        task.spawn(applyTraits, entity)
 
         if typeof(entity) == 'Instance' then
             entity.Destroying:Connect(function()
@@ -161,12 +189,12 @@ local function World(): World
             addComponentDataToEntity(entity, componentData)
         end
 
-        applyTraits(entity)
+        task.spawn(applyTraits, entity)
     end
 
     debug.profileend()
 
-    return Class
+    return Class :: World
 end
 
 return World
