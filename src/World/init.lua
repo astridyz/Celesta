@@ -62,8 +62,6 @@ local function World(): World
 
         for _, component in { ... } do
             local componentData = Datas[component.name][entity]
-
-            assert(componentData)
             
             table.insert(results, componentData)
         end
@@ -74,7 +72,7 @@ local function World(): World
     local function addComponentDataToEntity(entity: Entity, componentData)
         local componentName = componentData._name
 
-        print('Adding component:', componentName)
+        -- print('Adding component:', componentName)
 
         scheduleComponent(componentData)
 
@@ -103,19 +101,19 @@ local function World(): World
     local function applyTraits(entity: Entity)
         debug.profilebegin('apply trait')
 
-        print('Starting to apply to:', entity)
+        -- print('Starting to apply to:', entity)
 
         for componentSet, trait in Traits do
             
             if not hasComponentSet(entity, componentSet) then
 
-                print(entity, 'doesnt have the component set', componentSet)
+                -- print(entity, 'doesnt have the component set', componentSet)
 
                 if not trait.isApplied(entity) then
                     continue
                 end
 
-                print('Removing trait from:', entity)
+                -- print('Removing trait from:', entity)
 
                 trait.remove(entity)
 
@@ -134,6 +132,19 @@ local function World(): World
         end
 
         debug.profileend()
+    end
+    
+    local function removeComponentFromEntity(entity, component)
+        
+        if not Datas[component.name][entity] then
+            error('Attempt to remove inexistent component')
+        end
+
+        table.clear(Datas[component.name][entity])
+        EntityMap[entity].components[component.name] = nil
+
+        applyTraits(entity)
+
     end
 
     function Class.spawn(...)
@@ -155,9 +166,10 @@ local function World(): World
             addComponentDataToEntity(entity, componentData)
         end
 
-        task.spawn(applyTraits, entity)
+        applyTraits(entity)
 
         if typeof(entity) == 'Instance' then
+
             entity.Destroying:Connect(function()
 
                 Class.despawn(entity)
@@ -184,12 +196,24 @@ local function World(): World
         EntityMap[entity] = nil
     end
 
+    function Class.remove(entity, ...: Types.Component)
+
+        if not EntityMap[entity] then
+            error('Entity doesnt exist')
+        end
+        
+        for _, component in { ... } do
+            removeComponentFromEntity(entity, component)
+        end
+
+    end
+
     function Class.insert(entity, ...: ComponentData)
         for _, componentData in { ... } do
             addComponentDataToEntity(entity, componentData)
         end
 
-        task.spawn(applyTraits, entity)
+        applyTraits(entity)
     end
 
     debug.profileend()

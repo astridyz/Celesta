@@ -11,9 +11,28 @@ type Value<D, O> = Types.Value<D, O>
 
 type Component = Types.Component
 
-local function Component(name: string?, default: Data?): Component
+local function Component(...): Component
 
     debug.profilebegin('new component')
+
+    local args = { ... }
+    local name
+    local default
+
+    --// Unnecessary
+    if args[1] ~= nil then
+
+        if typeof(args[1]) == 'string' then
+            name = args[1]
+            default = args[2] and args[2] or nil
+
+        elseif typeof(args[1]) == 'table' then
+
+            name = args[2] and args[2] or nil
+            default = args[1]
+        end
+
+    end
 
     assert(
         default == nil or typeof(default) == 'table',
@@ -55,4 +74,8 @@ local function Component(name: string?, default: Data?): Component
     return Class
 end
 
-return Component
+type newComponent = ((name: string, default: Data?) -> Component)
+& ((default: Data, name: string?) -> Component)
+& ((name: string?, defalt: Data?) -> Component)
+
+return Component :: newComponent

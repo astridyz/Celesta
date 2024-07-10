@@ -1,3 +1,9 @@
+local scopeIndexes = {
+    Computed = true,
+    Value = true,
+    insert = true
+}
+
 local function Cleanup(scope: {unknown})
     
     for index, value in scope do
@@ -18,6 +24,9 @@ local function Cleanup(scope: {unknown})
         elseif valueType == 'table' then
             Cleanup(value)
 
+        elseif valueType == 'function' and not scopeIndexes[index] then
+            value()
+        
         end
 
     end

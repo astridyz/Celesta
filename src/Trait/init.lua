@@ -25,8 +25,7 @@ local function Trait<entity>(requirements: {[any]: Component}, init: Initter<ent
     local applied = {}
 
     function Class.apply(entity, world)
-        print('Applying trait to:', entity, 'componentSet:', requirements)
-
+        -- print('Applying trait to:', entity, 'componentSet:', requirements)
 
         if applied[entity] then
             warn('Trying to apply twitce to the same entity')
@@ -42,6 +41,7 @@ local function Trait<entity>(requirements: {[any]: Component}, init: Initter<ent
     end
 
     function Class.remove(entity)
+
         if not applied[entity] then
             warn('Entity does not have this trait.')
             return

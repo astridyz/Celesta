@@ -30,6 +30,16 @@ local function Scoped()
         return value :: any
     end
 
+    function Scope:insert(...: any)
+        local args = { ... }
+
+        for _, value in args do
+            
+            table.insert(Scope, value)
+
+        end
+    end
+
     debug.profileend()
 
     return Scope

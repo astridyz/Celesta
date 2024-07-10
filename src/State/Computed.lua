@@ -29,7 +29,6 @@ local function Computed<D>(value: Value<D, unknown>, result: <D>(use: useFunctio
             exchangeDependency(addValue, Computed)
         end
 
-
         return addValue:get()
     end
 

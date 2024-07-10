@@ -19,7 +19,8 @@ export type Value<data, O> = StateObject & {
 
 export type Scoped<O> = {any} & {
     Computed: (self: O, value: Value<unknown, unknown>, result: (use: useFunction) -> ...any) -> Computed<unknown>,
-    Value: <data>(self: O, initialData: data) -> Value<data, unknown>
+    Value: <data>(self: O, initialData: data) -> Value<data, unknown>,
+    insert: (self: O, ...any) -> ()
 }
 
 export type Computed<O> = StateObject & {
@@ -63,7 +64,8 @@ export type World = {
     & ((identifier: Instance, ...ComponentData) -> Entity),
 
     despawn: (entity: Entity) -> (),
-    insert: (entity: Entity, ...ComponentData) -> ()
+    insert: (entity: Entity, ...ComponentData) -> (),
+    remove: (entity: Entity, ...Component) -> ()
 }
 
 export type Get = ((entity: Entity, component: Component) -> ComponentData & Scoped<unknown>)
