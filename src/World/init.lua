@@ -62,6 +62,10 @@ local function World(): World
 
         for _, component in { ... } do
             local componentData = Datas[component.name][entity]
+
+            if not componentData then
+                table.insert(results, false)
+            end
             
             table.insert(results, componentData)
         end
