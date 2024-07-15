@@ -1,81 +1,77 @@
 --!strict
 --// Packages
+local Select = require(script.Parent.Select)
 local JoinData = require(script.Parent.JoinData)
 local ToValue = require(script.ToValue)
+local ExchangeDependency = require(script.Parent.Exchange)
+local ClearStateObject = require(script.Parent.Clear)
 
 local Scoped = require(script.Parent.State.Scoped)
 
 local Types = require(script.Parent.Types)
-type Data = Types.Data
-type Value<D, O> = Types.Value<D, O>
-
 type Component = Types.Component
 
 local function Component(...): Component
 
-    debug.profilebegin('new component')
+    debug.profilebegin('new Component')
 
-    local args = { ... }
-    local name
-    local default
+    local name, default = Select(
+        { ... }, 'string', 'table'
+    )
 
-    --// Unnecessary
-    if args[1] ~= nil then
-
-        if typeof(args[1]) == 'string' then
-            name = args[1]
-            default = args[2] and args[2] or nil
-
-        elseif typeof(args[1]) == 'table' then
-
-            name = args[2] and args[2] or nil
-            default = args[1]
-        end
-
-    end
+    name = name or debug.info(2, "s") :: string .. "@" .. debug.info(2, "l")
 
     assert(
         default == nil or typeof(default) == 'table',
         'If default data is provided, it must be a table'
     )
 
-    name = name or debug.info(2, "s") :: string .. "@" .. debug.info(2, "l")
-
     local Class = {
-        name = name :: string,
+        Kind = 'Component' :: 'Component',
+        Name = name,
+        _dependents = {},
+        _dependencies = {}
     }
 
-    function Class.new(parcialData: Data?)
-        parcialData = parcialData or {}
+    function Class.Instantiate(defaultData: Types.Data?)
+        local prototype = defaultData or {}
 
         if default then
-            JoinData(default, parcialData)
+            JoinData(default, prototype)
         end
 
-        local data = ToValue(parcialData :: Data)
+        prototype = ToValue(prototype)
 
-        data = JoinData(data, Scoped())
+        local data = Scoped() :: Types.Datatype
+        JoinData(prototype, data)
 
-        data._name = name :: string
+        --// If the component get destroyed, its instances will too.
+        ExchangeDependency(Class, data)
 
-        return data :: Types.Scoped<unknown> & Types.ComponentData
+        --// Applying the component ID to the instance
+        --// So we can know this instance component
+        data._name = name
+
+        return data
     end
 
-    local meta = {}
+    function Class.Destruct()
+        ClearStateObject(Class)
 
-    function meta:__call(parcialData: Data?)
-        return Class.new(parcialData)
+        table.clear(Class)
     end
 
-    setmetatable(Class, meta)
+    local Meta = {}
 
+    function Meta:__call(...)
+        return Class.Instantiate(...)
+    end
+    
+    setmetatable(Class, Meta)
+    
     debug.profileend()
 
-    return Class
+    return Class :: any
 end
 
-type newComponent = ((name: string, default: Data?) -> Component)
-& ((default: Data, name: string?) -> Component)
-& ((name: string?, defalt: Data?) -> Component)
-
-return Component :: newComponent
+return Component

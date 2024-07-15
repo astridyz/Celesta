@@ -1,48 +1,60 @@
 --!strict
 --// Packages
-local Computed = require(script.Parent.Computed)
-local Value = require(script.Parent.Value)
+local State = script.Parent
 
-local Types = require(script.Parent.Parent.Types)
-type Scoped<O> = Types.Scoped<O>
+local ClearStateObject = require(State.Parent.Clear)
+
+local Computed = require(State.Computed)
+local Value = require(State.Value)
+
+local Types = require(State.Parent.Types)
+type Scoped<O, D> = Types.Scoped<O, D>
 
 type useFunction = Types.useFunction
 
-local function Scoped()
+local function Scoped(): Types.Scoped<unknown, unknown>
     
-    debug.profilebegin('new Scope')
+    debug.profilebegin('new scope')
 
-    local Scope = {} :: Scoped<unknown>
+    local Class = {
+        Kind = 'Scoped' :: 'Scoped',
+        _dependents = {},
+        _dependencies = {}
+    }
 
-    function Scope:Computed(value, result: (use: useFunction) -> ...any)
+    function Class:Computed(value, result: (use: useFunction) -> ...any)
         local computed = Computed(value, result :: any)
 
-        table.insert(Scope, computed)
+        table.insert(Class, computed)
 
         return computed
     end
 
-    function Scope:Value<data>(initialData: data)
-        local value = Value(initialData)
+    function Class:Value<data>(initialData: data)
+        local newValue = Value(initialData)
 
-        table.insert(Scope, value)
+        table.insert(Class, newValue :: any)
 
-        return value :: any
+        return newValue
     end
 
-    function Scope:insert(...: any)
+    function Class.Insert(...: any)
         local args = { ... }
 
         for _, value in args do
-            
-            table.insert(Scope, value)
-
+            table.insert(Class, value)
         end
+    end
+
+    function Class.Destruct()
+        ClearStateObject(Class)
+
+        table.clear(Class)
     end
 
     debug.profileend()
 
-    return Scope
+    return Class :: any
 end
 
 return Scoped

@@ -4,11 +4,11 @@ export type World = Types.World
 export type Trait = Types.Trait
 
 export type Component = Types.Component
-export type ComponentData = Types.ComponentData
+export type Datatype = Types.Datatype
 
-export type Computed<O> = Types.Computed<O>
-export type Scoped<O> = Types.Scoped<O>
-export type Value<D, O> = Types.Value<D, O>
+export type Computed = Types.Computed
+export type Scoped<O, D> = Types.Scoped<O, D>
+export type Value<O, D> = Types.Value<O, D>
 
 return {
     World = require(script.World),

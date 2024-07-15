@@ -7,8 +7,8 @@ local function updateAll(target, ...: any?)
             dependent(...)
         end
 
-        if depType == 'table' and dependent.update then
-            dependent:update(...)
+        if depType == 'table' and dependent.Update then
+            dependent.Update(...)
         end
     end
 end

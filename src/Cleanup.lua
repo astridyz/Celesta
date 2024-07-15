@@ -1,7 +1,7 @@
 local scopeIndexes = {
     Computed = true,
     Value = true,
-    insert = true
+    Insert = true
 }
 
 local function Cleanup(scope: {unknown})
@@ -21,6 +21,9 @@ local function Cleanup(scope: {unknown})
         elseif valueType == 'table' and value.Disconnect then
             value:Disconnect()
 
+        elseif valueType == 'table' and value.Destruct then
+            value.Destruct()
+
         elseif valueType == 'table' then
             Cleanup(value)
 
@@ -28,7 +31,6 @@ local function Cleanup(scope: {unknown})
             value()
         
         end
-
     end
 
     table.clear(scope)

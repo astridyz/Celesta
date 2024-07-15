@@ -1,77 +1,96 @@
 --!strict
 export type Data = {[string]: any}
 
-export type StateObject = {
-    class: string,
+export type State = {
     _dependencies: {[any]: boolean},
     _dependents: {[{destroy: <S>(self: S) -> ()}]: boolean},
+    Destruct: () -> ()
 }
 
 export type useFunction = <data>(addValue: {get: () -> data}) -> data
 
-export type Value<data, O> = StateObject & {
+export type Value<O, D = any> = State & {
+    Kind: 'Value',
     set: (self: O, data: any, force: boolean?) -> (),
-    get: (self: O) -> data,
-    destroy: (self: O) -> (),
-
-    Computed: (self: O, result: (use: useFunction) -> ...any) -> Computed<unknown>
+    get: (self: O) -> D,
 }
 
-export type Scoped<O> = {any} & {
-    Computed: (self: O, value: Value<unknown, unknown>, result: (use: useFunction) -> ...any) -> Computed<unknown>,
-    Value: <data>(self: O, initialData: data) -> Value<data, unknown>,
-    insert: (self: O, ...any) -> ()
+export type Scoped<O, D> = State & D & {State} & {
+    Kind: 'Scoped',
+    Computed: (self: O, value: Value<unknown, unknown>, result: (use: useFunction) -> ...any) -> Computed,
+    Value: <data>(self: O, initialData: data) -> Value<unknown, data>,
+    Insert: (...any) -> ()
 }
 
-export type Computed<O> = StateObject & {
-    update: (self: O) -> (),
-    destroy: (self: O) -> ()
+export type Computed = State & {
+    Kind: 'Computed',
+    Update: () -> ()
 }
 
-export type Component = typeof(setmetatable(
+export type World = {
+    Kind: 'World',
+    _entities: {[ID]: Entity},
+    _traits: {[{Component}]: Trait},
+    Size: number,
+    Get: (entityID: ID) -> Entity?,
+    ScheduleTrait: (...Trait) -> (),
+
+    Entity: ((identifier: Instance, ...Component) -> Entity)
+    & ((...Component) -> Entity),
+
+    Despawn: (entityID: ID) -> ()
+}
+
+export type Requisite<D> = {
+    Instantiate: () -> D
+}
+
+export type Intersection<Reqs...> = (Reqs...) -> ()
+
+export type Trait = State & {
+    Kind: 'Trait',
+    _applied: {[Entity]: Scoped<unknown, unknown>},
+    _requirements: {Component},
+    Apply: (entity: Entity, world: World) -> (),
+    Remove: (entity: Entity) -> (),
+    IsApplied: (entity: Entity) -> boolean
+}
+
+export type ID = number | Instance
+
+export type Entity = State & {
+    Kind: 'Entity',
+    _id: ID,
+    _storage: {[string]: Datatype},
+    Add: (datatype: Datatype) -> Entity,
+    Remove: (component: Component) -> Entity,
+    ChildOf: (targetEntity: Entity) -> Entity,
+    Get: EntityGet,
+    Has: (...Component) -> boolean,
+    Clear: () -> (),
+    Destruct: () -> ()
+}
+
+export type EntityGet = ((component: Component) -> Datatype)
+& ((component1: Component, component2: Component) -> (Datatype, Datatype))
+& ((component1: Component, component2: Component, component3: Component) -> (Datatype, Datatype, Datatype))
+& ((component1: Component, component2: Component, component3: Component, component4: Component) -> (Datatype, Datatype, Datatype, Datatype))
+& ((component1: Component, component2: Component, component3: Component, component4: Component, component5: Component) -> (Datatype, Datatype, Datatype, Datatype, Datatype))
+
+export type Component = State & typeof(setmetatable(
     {} :: {
-        name: string,
-        new: (parcialData: Data?) -> ComponentData & Scoped<unknown>
+        Instantiate: (defaultData: Data?) -> Datatype,
+        Name: string,
+        Kind: 'Component',
     },
     {} :: {
-        __call: (self: unknown, parcialData: Data?) -> ComponentData & Scoped<unknown>
+        __call: (self: unknown, defaultData: Data?) -> Datatype
     }
 ))
 
-export type ComponentData = {
+export type Datatype = Scoped<unknown, {
     _name: string,
-    [string]: Value<any, unknown>
-}
+    [string]: Value<unknown, unknown>
+}>
 
-export type Trait = {
-    _requirements: {[string]: Component},
-    apply: (entity: any, world: any) -> (),
-    remove: (entity: unknown) -> (),
-    isApplied: (Entity: unknown) -> boolean
-}
-
-export type Initter<entity> = (entity: entity, world: World, scope: Scoped<unknown>) -> ()
-
-export type Entity = number | Instance
-
-export type World = {
-    size: number,
-    scheduleTraits: (traits: {Trait}) -> (),
-
-    get: Get,
-    
-    spawn: ((...ComponentData) -> Entity)
-    & ((identifier: Instance, ...ComponentData) -> Entity),
-
-    despawn: (entity: Entity) -> (),
-    insert: (entity: Entity, ...ComponentData) -> (),
-    remove: (entity: Entity, ...Component) -> ()
-}
-
-export type Get = ((entity: Entity, component: Component) -> ComponentData & Scoped<unknown>)
-& ((entity: Entity, component1: Component, component2: Component) -> (ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>))
-& ((entity: Entity, component1: Component, component2: Component, component3: Component) -> (ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>))
-& ((entity: Entity, component1: Component, component2: Component, component3: Component, component4: Component) -> (ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>))
-& ((entity: Entity, component1: Component, component2: Component, component3: Component, component4: Component, component5: Component) -> (ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>, ComponentData & Scoped<unknown>))
-
-return {}
+return 0 

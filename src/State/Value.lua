@@ -5,28 +5,25 @@ local State = script.Parent
 local Update = require(State.Parent.Update)
 local clearStateObject = require(State.Parent.Clear)
 
-local Computed = require(State.Computed)
-
 local Types = require(State.Parent.Types)
-type StateObject = Types.StateObject
 type useFunction = Types.useFunction
 
 type Value<D, O> = Types.Value<D, O>
 
 --// This
-local function Value<data>(initialData: data?): Value<data, unknown>
+local function Value<data>(initialData: data?): Value<unknown, data>
 
-    debug.profilebegin('new Value')
+    debug.profilebegin('new value')
 
-    local Value = {
+    local Class = {
+        Kind = 'Value' :: 'Value',
         _dependencies = {},
         _dependents = {},
-        class = 'Value'
-    } :: Value<data, unknown>
+    } :: Value<unknown, data>
 
     local currentData = initialData
 
-    function Value:set(data: any, force: boolean?)
+    function Class:set(data: any, force: boolean?)
         if data == currentData and not force then
             return
         end
@@ -35,23 +32,19 @@ local function Value<data>(initialData: data?): Value<data, unknown>
         Update(Value)
     end
 
-    function Value:get()
+    function Class:get()
         return currentData or {} :: any
     end
 
-    function Value:Computed(result: (use: useFunction) -> ...any)
-        return Computed(Value, result :: any)
-    end
-
-    function Value:destroy()
+    function Class.Destruct()
         clearStateObject(Value)
 
-        table.clear(Value)
+        table.clear(Class)
     end
 
     debug.profileend()
 
-    return Value
+    return Class
 end
 
 return Value

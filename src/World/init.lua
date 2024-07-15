@@ -1,228 +1,237 @@
 --!strict
---!nolint UninitializedLocal
+--!nolint
 --// Packages
-local Cleanup = require(script.Parent.Cleanup)
+local Select = require(script.Parent.Select)
+local ExchangeDependency = require(script.Parent.Exchange)
 
 local Types = require(script.Parent.Types)
 type World = Types.World
-type Entity = Types.Entity
-
 type Trait = Types.Trait
-type ComponentData = Types.ComponentData
+type Entity = Types.Entity
+type Component = Types.Component
+type Datatype = Types.Datatype
+type ID = Types.ID
 
 local function World(): World
 
     debug.profilebegin('new world')
 
-    local Class = {
-        size = 0
-    }
+    local World = {
+        Kind = 'World' :: 'World',
+        _entities = {},
+        _traits = {},
+        Size = 0
+    } :: World
 
-    local Datas = {}
-    local Traits = {}
+    local function ScheduleTrait(trait: Trait)
+        World._traits[trait._requirements] = trait
+    end
 
-    local EntityMap = {}
+    local function ApplyTraits(entity: Entity)
+        debug.profilebegin('apply trait')
 
-    function Class.scheduleTraits(traits: {Trait})
-        for _, trait in traits do
-            Traits[trait._requirements] = trait
+        for componentSet, trait in World._traits do
+
+            --// If entity has the trait requirements
+            if entity.Has(table.unpack(componentSet) :: Component) then
+                
+                --// If its applied we continue
+                if trait.IsApplied(entity) then
+                    continue
+                end
+
+                --// If its not we apply
+                trait.Apply(entity, World)
+                continue
+            end
+
+            --// If it is applied and the entity doesnt have the requirements
+            --// anymore, we remove the trait
+            if trait.IsApplied(entity) then
+                
+                trait.Remove(entity)
+            end
+        end
+
+        debug.profileend()
+    end
+
+    function World.ScheduleTrait(...: Trait)
+        for _, trait in { ... } do
+            ScheduleTrait(trait :: any)
         end
     end
-
-    local function scheduleComponent(component)
-        local componentName = component._name or component.name
-
-        assert(componentName)
-
-        if not Datas[componentName] then
-            Datas[componentName] = {}
-        end
-    end
-
-    local function createEntity(ID: Instance?)
-        Class.size += 1
-
-        local entity = ID or Class.size
-
-        EntityMap[entity] = {
-            components = {},
-            traits = {}
-        }
-
-        return entity
-    end
-
-    function Class.get(entity, ...)
+    
+    local function addDatatypeToEntity(entity: Entity, datatype: Datatype)
+        local name = datatype._name
         
-        if not EntityMap[entity] then
+        entity._storage[name] = datatype
+    end
+
+    local function removeComponentFromEntity(entity: Entity, component)
+        if not entity.Has(component) then
             return
         end
 
-        local results = {}
+        local name = component.Name
+
+        entity._storage[name].Destruct()
+
+        --// Setting it to nil right after destructing
+        --// To remove all traits
+        entity._storage[name] = nil
+    end
+
+    local function getComponent(entity, ...)
+        local results = {} :: {boolean | Datatype}
 
         for _, component in { ... } do
-            local componentData = Datas[component.name][entity]
+            local datatype = entity._storage[component.name]
 
-            if not componentData then
+            if not datatype then
                 table.insert(results, false)
             end
             
-            table.insert(results, componentData)
+            table.insert(results, datatype)
         end
 
         return table.unpack(results)
     end
 
-    local function addComponentDataToEntity(entity: Entity, componentData)
-        local componentName = componentData._name
+    function World.Get(entityID: Types.ID)
+        local entity = World._entities[entityID]
 
-        -- print('Adding component:', componentName)
+        if not entityID then
+            return
+        end
 
-        scheduleComponent(componentData)
+        return entity
+    end
 
-        EntityMap[entity].components[componentName] = true
+    local function GenerateEntity(ID: Types.ID?)
+        debug.profilebegin('new entity')
+
+        World.Size += 1
+
+        local entityID = ID or World.Size
         
-        Datas[componentName][entity] = componentData
-    end
-
-    local function hasComponent(entity: Entity, component)
-        scheduleComponent(component)
-
-        return Datas[component.name][entity] and true
-    end
-
-    local function hasComponentSet(entity, componentSet)
-        for _, component in componentSet do
-
-            if not hasComponent(entity, component) then
-                return false
-            end
+        if World._entities[entityID] then
+            error('Entity ID already taken')
         end
 
-        return true
-    end
+        local Entity = {
+            Kind = 'Entity' :: 'Entity',
+            _id = entityID,
+            _storage = {},
+            _dependencies = {},
+            _dependents = {}
+        } :: Entity
 
-    local function applyTraits(entity: Entity)
-        debug.profilebegin('apply trait')
+        function Entity.Add(datatype: Datatype)
+            addDatatypeToEntity(Entity, datatype)
 
-        -- print('Starting to apply to:', entity)
+            ApplyTraits(Entity)
 
-        for componentSet, trait in Traits do
+            return Entity
+        end
+
+        function Entity.Remove(component: Component)
+            removeComponentFromEntity(Entity, component)
+
+            ApplyTraits(Entity)
             
-            if not hasComponentSet(entity, componentSet) then
+            return Entity
+        end
 
-                -- print(entity, 'doesnt have the component set', componentSet)
+        function Entity.ChildOf(targetEntity: Entity)
+            ExchangeDependency(targetEntity, Entity)
 
-                if not trait.isApplied(entity) then
-                    continue
+            return Entity
+        end
+
+        function Entity.Get(...: any): ...any
+            return getComponent(Entity, ...)
+        end
+
+        function Entity.Has(...: Component)
+            for _, component in { ... } do
+                if Entity._storage[component.Name] == nil then
+                    return false
                 end
-
-                -- print('Removing trait from:', entity)
-
-                trait.remove(entity)
-
-                EntityMap[entity].traits[trait] = nil
-
-                continue
             end
 
-            if trait.isApplied(entity) then
-                continue
-            end
-            
-            trait.apply(entity, Class)
-
-            EntityMap[entity].traits[trait] = true
+            return true
         end
+
+        function Entity.Clear()
+            for _, datatype in Entity._storage do
+                datatype.Destruct()
+            end
+
+            ApplyTraits(Entity)
+        end
+
+        function Entity.Destruct()
+            Entity.Clear()
+
+            table.clear(Entity)
+            World._entities[entityID] = nil
+        end
+
+        if typeof(entityID) == 'Instance' then
+            entityID.Destroying:Connect(function()
+
+                Entity.Destruct()
+            end)
+        end
+
+        World._entities[entityID] = Entity
 
         debug.profileend()
-    end
-    
-    local function removeComponentFromEntity(entity, component)
         
-        if not Datas[component.name][entity] then
-            error('Attempt to remove inexistent component')
-        end
-
-        table.clear(Datas[component.name][entity])
-        EntityMap[entity].components[component.name] = nil
-
-        applyTraits(entity)
-
+        return Entity
     end
 
-    function Class.spawn(...)
+    function World.Entity(...)
         debug.profilebegin('spawn entity')
 
         local args = { ... }
         local entity
 
-        if typeof(args[1]) == 'Instance' then
-            entity = createEntity(args[1])
+        if Select(args, 'Instance') then
+            entity = GenerateEntity(args[1])
             table.remove(args, 1)
+
         else
-            entity =  createEntity()
+            entity = GenerateEntity()
         end
 
-        print('Spawning entity: ', entity)
+        print('Spawning entity:', entity)
 
-        for _, componentData in args do
-            addComponentDataToEntity(entity, componentData)
+        for _, datatype in args do
+            addDatatypeToEntity(entity, datatype)
         end
 
-        applyTraits(entity)
-
-        if typeof(entity) == 'Instance' then
-
-            entity.Destroying:Connect(function()
-
-                Class.despawn(entity)
-            end)
-        end
+        ApplyTraits(entity)
 
         debug.profileend()
 
         return entity
     end
 
-    function Class.despawn(entity)
+    function World.Despawn(entityID: ID)
+        local entity = World._entities[entityID]
 
-        for trait in EntityMap[entity].traits do
-            trait.remove(entity)
+        if not entity then
+            return
         end
 
-        for componentName in EntityMap[entity].components do
-            local componentData = Datas[componentName][entity]
-
-            Cleanup(componentData)
-        end
-
-        EntityMap[entity] = nil
-    end
-
-    function Class.remove(entity, ...: Types.Component)
-
-        if not EntityMap[entity] then
-            error('Entity doesnt exist')
-        end
-        
-        for _, component in { ... } do
-            removeComponentFromEntity(entity, component)
-        end
-
-    end
-
-    function Class.insert(entity, ...: ComponentData)
-        for _, componentData in { ... } do
-            addComponentDataToEntity(entity, componentData)
-        end
-
-        applyTraits(entity)
+        entity.Destruct()
     end
 
     debug.profileend()
 
-    return Class :: World
+    return World
 end
 
 return World

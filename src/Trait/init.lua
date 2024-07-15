@@ -1,64 +1,75 @@
 --!strict
 --// Packages
-local Transform = require(script.Transform)
+local ExchangeDependency = require(script.Parent.Exchange)
+local ClearStateObject = require(script.Parent.Clear)
 local Cleanup = require(script.Parent.Cleanup)
 
 local Scoped = require(script.Parent.State.Scoped)
 
 local Types = require(script.Parent.Types)
 type Trait = Types.Trait
-type Initter<E> = Types.Initter<E>
-
-type Scoped<O> = Types.Scoped<O>
 type Component = Types.Component
+type Entity = Types.Entity
+type World = Types.World
+type Scoped<O, D> = Types.Scoped<O, D>
+type Intersection<R...> = Types.Intersection<R...>
 
-local function Trait<entity>(requirements: {[any]: Component}, init: Initter<entity>): Trait
+--// function forAll<Req...>(requirements: intersection<Req...>, init: (world, entity, scopeReq...) -> ()): trait
+local function Trait<Req...>(
+    requirements: Intersection<Req...>,
+    initter: (entity: Entity, world: World, scope: Scoped<unknown, any>, Req...) -> ()
+): Trait
 
     debug.profilebegin('new trait')
 
-    requirements = typeof(requirements) == 'table' and requirements or {requirements} :: any
+    local reqComponents = requirements :: any
 
-    local Class = {
-        _requirements = Transform(requirements :: any),
-    } :: Trait
+    local Trait = {
+        Kind = 'Trait' :: 'Trait',
+        _dependents = {},
+        _dependencies = {},
+        _applied = {},
+        _requirements = reqComponents
+    }
 
-    local applied = {}
-
-    function Class.apply(entity, world)
-        -- print('Applying trait to:', entity, 'componentSet:', requirements)
-
-        if applied[entity] then
-            warn('Trying to apply twitce to the same entity')
-            return
-        end
-
-        applied[entity] = Scoped()
-
-        table.insert(
-            applied[entity],
-            task.spawn(init, entity, world, applied[entity]
-        ))
+    for _, component in reqComponents do
+        ExchangeDependency(component, Trait)
     end
 
-    function Class.remove(entity)
+    function Trait.Apply(entity, world)
+        local entityScope = Scoped()
 
-        if not applied[entity] then
-            warn('Entity does not have this trait.')
-            return
-        end
+        local thread = task.spawn(initter, entity, world, entityScope)
 
-        Cleanup(applied[entity])
+        entityScope:Insert(thread)
 
-        applied[entity] = nil
+        Trait._applied[entity] = entityScope
     end
 
-    function Class.isApplied(entity)
-        return if applied[entity] then true else false
+    function Trait.Remove(entity)
+        local entityScope = Trait._applied[entity]
+
+        Cleanup(entityScope)
+    end
+
+    function Trait.IsApplied(entity)
+        return Trait._applied[entity] and true or false
+    end
+
+    function Trait.Destruct()
+
+        for entity in Trait._applied do
+            Trait.Remove(entity :: Entity)
+        end
+
+        ClearStateObject(Trait)
+
+        table.clear(Trait)
     end
 
     debug.profileend()
 
-    return Class
+    return Trait
 end
 
 return Trait
