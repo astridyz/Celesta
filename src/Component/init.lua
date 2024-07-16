@@ -52,6 +52,9 @@ local function Component(...): Component
         --// So we can know this instance component
         data._name = name
 
+        --// Aplplying its kind to help identify in bundles
+        data.Kind = 'Datatype' :: any
+
         return data
     end
 

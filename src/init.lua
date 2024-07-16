@@ -16,6 +16,7 @@ return {
     Component = require(script.Component),
 
     Intersect = require(script.Trait.Intersect),
+    Bundle = require(script.Bundle),
 
     Computed = require(script.State.Computed),
     Scoped = require(script.State.Scoped),

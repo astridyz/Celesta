@@ -35,14 +35,10 @@ export type World = {
     Get: (entityID: ID) -> Entity?,
     ScheduleTrait: (...Trait) -> (),
 
-    Entity: ((identifier: Instance, ...Component) -> Entity)
-    & ((...Component) -> Entity),
+    Entity: ((identifier: Instance, ...Datatype | {[any]: Datatype}) -> Entity)
+    & ((...Datatype | {[any]: Datatype}) -> Entity),
 
     Despawn: (entityID: ID) -> ()
-}
-
-export type Requisite<D> = {
-    Instantiate: () -> D
 }
 
 export type Intersection<Reqs...> = (Reqs...) -> ()
@@ -62,11 +58,13 @@ export type Entity = State & {
     Kind: 'Entity',
     _id: ID,
     _storage: {[string]: Datatype},
-    Add: (datatype: Datatype) -> Entity,
-    Remove: (component: Component) -> Entity,
+    Add: (...Datatype) -> Entity,
+    Remove: (...Component | Bundle | {[any]: Component}) -> Entity,
     ChildOf: (targetEntity: Entity) -> Entity,
     Get: EntityGet,
-    Has: (...Component) -> boolean,
+
+    Has: ((...Component | Bundle | {Component}) -> boolean),
+
     Clear: () -> (),
     Destruct: () -> ()
 }
@@ -77,11 +75,11 @@ export type EntityGet = ((component: Component) -> Datatype)
 & ((component1: Component, component2: Component, component3: Component, component4: Component) -> (Datatype, Datatype, Datatype, Datatype))
 & ((component1: Component, component2: Component, component3: Component, component4: Component, component5: Component) -> (Datatype, Datatype, Datatype, Datatype, Datatype))
 
-export type Component = State & typeof(setmetatable(
+export type Component = typeof(setmetatable(
     {} :: {
         Instantiate: (defaultData: Data?) -> Datatype,
         Name: string,
-        Kind: 'Component',
+        Kind: 'Component'
     },
     {} :: {
         __call: (self: unknown, defaultData: Data?) -> Datatype
@@ -89,8 +87,20 @@ export type Component = State & typeof(setmetatable(
 ))
 
 export type Datatype = Scoped<unknown, {
+    Kind: 'Datatype',
     _name: string,
     [string]: Value<unknown, unknown>
 }>
 
-return 0 
+export type Bundle = typeof(setmetatable(
+    {} :: {
+        Kind: 'Bundle',
+        Use: (...Datatype) -> {[string]: Datatype},
+        _set: {Component}
+    },
+    {} :: {
+        __call: (self: unknown, ...Datatype) -> {[string]: Datatype}
+    }
+))
+
+return 0

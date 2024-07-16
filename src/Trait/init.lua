@@ -1,24 +1,23 @@
 --!strict
 --// Packages
-local ExchangeDependency = require(script.Parent.Exchange)
+local ExchangeDependencyAll = require(script.Parent.ExchangeAll)
+
 local ClearStateObject = require(script.Parent.Clear)
 local Cleanup = require(script.Parent.Cleanup)
 
 local Scoped = require(script.Parent.State.Scoped)
 
 local Types = require(script.Parent.Types)
-type Trait = Types.Trait
 type Component = Types.Component
 type Entity = Types.Entity
-type World = Types.World
 type Scoped<O, D> = Types.Scoped<O, D>
 type Intersection<R...> = Types.Intersection<R...>
 
 --// function forAll<Req...>(requirements: intersection<Req...>, init: (world, entity, scopeReq...) -> ()): trait
 local function Trait<Req...>(
     requirements: Intersection<Req...>,
-    initter: (entity: Entity, world: World, scope: Scoped<unknown, any>, Req...) -> ()
-): Trait
+    initter: (entity: Entity, world: Types.World, scope: Scoped<unknown, any>, Req...) -> ()
+): Types.Trait
 
     debug.profilebegin('new trait')
 
@@ -32,9 +31,7 @@ local function Trait<Req...>(
         _requirements = reqComponents
     }
 
-    for _, component in reqComponents do
-        ExchangeDependency(component, Trait)
-    end
+    ExchangeDependencyAll(Trait, reqComponents)
 
     function Trait.Apply(entity, world)
         local entityScope = Scoped()

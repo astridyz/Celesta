@@ -4,8 +4,6 @@ A new theoretical pattern applied in a library.
 ## Info
 Celesta applies *entities*, *traits* and *components* to create a world.
 
-It also has React-style classes designed for optimizations and adaptation to the world.
-
 ## Usage
 Creating components and scheduling traits
 
@@ -44,8 +42,8 @@ local Trait = Celesta.Trait(Requirements,
                 end
             end
 
-            entity.Remove(Regeneration)
             --// Removing the component after the determined duration
+            entity.Remove(Regeneration)
         end)
 
         --// In case we remove the trait before the timer ends

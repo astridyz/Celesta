@@ -1,5 +1,4 @@
 --!strict
---!nolint
 --// Packages
 local Select = require(script.Parent.Select)
 local ExchangeDependency = require(script.Parent.Exchange)
@@ -34,7 +33,7 @@ local function World(): World
 
             --// If entity has the trait requirements
             if entity.Has(table.unpack(componentSet) :: Component) then
-                
+            
                 --// If its applied we continue
                 if trait.IsApplied(entity) then
                     continue
@@ -62,13 +61,29 @@ local function World(): World
         end
     end
     
-    local function addDatatypeToEntity(entity: Entity, datatype: Datatype)
+    local function addDatatypeToEntity(entity, datatype)
         local name = datatype._name
         
         entity._storage[name] = datatype
     end
 
-    local function removeComponentFromEntity(entity: Entity, component)
+    local function addDataToEntity(entity, ...)
+        for _, object in { ... } do
+            
+            if not (typeof(object) == 'table') then
+                continue
+            end
+
+            if object.Kind and object.Kind == 'Datatype' then
+                addDatatypeToEntity(entity, object)
+                continue
+            end
+
+            addDataToEntity(entity, object)
+        end
+    end
+
+    local function removeDatatypeFromEntity(entity, component)
         if not entity.Has(component) then
             return
         end
@@ -80,6 +95,22 @@ local function World(): World
         --// Setting it to nil right after destructing
         --// To remove all traits
         entity._storage[name] = nil
+    end
+
+    local function removeDataFromEntity(entity, ...)
+        for _, object in { ... } do
+            
+            if not (typeof(object) == 'table') then
+                continue
+            end
+
+            if object.Kind == 'Component' then
+                removeDatatypeFromEntity(entity, object)
+                continue
+            end
+
+            removeDataFromEntity(entity, object)
+        end
     end
 
     local function getComponent(entity, ...)
@@ -127,16 +158,16 @@ local function World(): World
             _dependents = {}
         } :: Entity
 
-        function Entity.Add(datatype: Datatype)
-            addDatatypeToEntity(Entity, datatype)
+        function Entity.Add(...: Datatype)
+            addDataToEntity(Entity, ...)
 
             ApplyTraits(Entity)
 
             return Entity
         end
 
-        function Entity.Remove(component: Component)
-            removeComponentFromEntity(Entity, component)
+        function Entity.Remove(...)
+            removeDataFromEntity(... :: any)
 
             ApplyTraits(Entity)
             
@@ -153,9 +184,27 @@ local function World(): World
             return getComponent(Entity, ...)
         end
 
-        function Entity.Has(...: Component)
-            for _, component in { ... } do
-                if Entity._storage[component.Name] == nil then
+        function Entity.Has(...: any)
+            for _, object in { ... } do
+
+                --// Bundle functions can get there
+                if not (typeof(object) == 'table') then
+                    continue
+                end
+
+                --// If is a component, we check it
+                if object.Kind and object.Kind 'Component' then
+
+                    if Entity._storage[object.Name] == nil then
+                        return false
+                    end
+
+                    continue
+                end
+
+                --// Is not a component but its a table,
+                --// so it must be a bundle or a table of components
+                if not Entity.Has(table.unpack(object)) then
                     return false
                 end
             end
@@ -167,6 +216,8 @@ local function World(): World
             for _, datatype in Entity._storage do
                 datatype.Destruct()
             end
+
+            table.clear(Entity._storage)
 
             ApplyTraits(Entity)
         end
@@ -208,9 +259,7 @@ local function World(): World
 
         print('Spawning entity:', entity)
 
-        for _, datatype in args do
-            addDatatypeToEntity(entity, datatype)
-        end
+        addDataToEntity(entity, args)
 
         ApplyTraits(entity)
 
