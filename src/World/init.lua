@@ -70,16 +70,21 @@ local function World(): World
     local function addDataToEntity(entity, ...)
         for _, object in { ... } do
             
-            if not (typeof(object) == 'table') then
+            if typeof(object) ~= 'table' then
                 continue
             end
 
-            if object.Kind and object.Kind == 'Datatype' then
+            --// In case there's no Kind, it must be a array of datatypes
+            --// Then, we loop over it to find every datatype on this array
+            if not object.Kind then
+                
+                addDataToEntity(entity, table.unpack(object))
+                continue
+            end
+
+            if object.Kind == 'Datatype' then
                 addDatatypeToEntity(entity, object)
-                continue
             end
-
-            addDataToEntity(entity, object)
         end
     end
 
@@ -104,12 +109,19 @@ local function World(): World
                 continue
             end
 
-            if object.Kind == 'Component' then
-                removeDatatypeFromEntity(entity, object)
+            if not object.Kind then
+
+                removeDataFromEntity(entity, table.unpack(object))
                 continue
             end
 
-            removeDataFromEntity(entity, object)
+            if object.Kind == 'Component' then
+                removeDatatypeFromEntity(entity, object)
+
+            elseif object.Kind == 'Bundle' then
+                removeDataFromEntity(entity, table.unpack(object._set))
+
+            end
         end
     end
 
@@ -139,7 +151,7 @@ local function World(): World
         return entity
     end
 
-    local function GenerateEntity(ID: Types.ID?)
+    local function GenerateEntity(ID: ID?)
         debug.profilebegin('new entity')
 
         World.Size += 1
@@ -187,25 +199,34 @@ local function World(): World
         function Entity.Has(...: any)
             for _, object in { ... } do
 
-                --// Bundle functions can get there
-                if not (typeof(object) == 'table') then
+                if typeof(object) ~= 'table' then
                     continue
                 end
 
-                --// If is a component, we check it
-                if object.Kind and object.Kind 'Component' then
+                --// In case there's no kind
+                --// It must be an array of components
+                if not object.Kind then
 
-                    if Entity._storage[object.Name] == nil then
+                    if not Entity.Has(table.unpack(object)) then
                         return false
                     end
 
                     continue
                 end
 
-                --// Is not a component but its a table,
-                --// so it must be a bundle or a table of components
-                if not Entity.Has(table.unpack(object)) then
-                    return false
+                --// If is a component, we check it
+                if object.Kind 'Component' then
+
+                    if Entity._storage[object.Name] == nil then
+                        return false
+                    end
+
+                elseif object.Kind == 'Bundle' then
+                    
+                    if not Entity.Has(table.unpack(object._set)) then
+                        return false
+                    end
+                
                 end
             end
 

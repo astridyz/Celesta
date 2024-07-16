@@ -9,7 +9,7 @@ type Datatype = Types.Datatype
 
 local function Bundle(...: Types.Component): Bundle
     
-    debug.profilebegin('new Class')
+    debug.profilebegin('new bundle')
 
     local Class = {
         Kind = 'Bundle' :: 'Bundle',
@@ -23,12 +23,14 @@ local function Bundle(...: Types.Component): Bundle
     function Class.Use(...: Datatype)
         local Data = {}
 
+        --// Creating datatypes of all the components in the bundle
         for _, component in Class._set do
             local datatype = component()
 
             Data[datatype._name] = datatype
         end
 
+        --// Overlaying the datatypes set before with the new provided at call
         for _, datatype in { ... } do
             Data[datatype._name] = datatype :: Datatype
         end

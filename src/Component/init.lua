@@ -45,14 +45,14 @@ local function Component(...): Component
         local data = Scoped() :: Types.Datatype
         JoinData(prototype, data)
 
-        --// If the component get destroyed, its instances will too.
+        --// If the component get destroyed, its instances will too
         ExchangeDependency(Class, data)
 
         --// Applying the component ID to the instance
         --// So we can know this instance component
         data._name = name
 
-        --// Aplplying its kind to help identify in bundles
+        --// Applying its kind to help identify it in bundles / components groups
         data.Kind = 'Datatype' :: any
 
         return data
