@@ -1,7 +1,5 @@
 local Value = require(script.Parent.Parent.State.Value)
 
--- local Types = require(script.Parent.Parent.Types)
-
 local function ToValue(data: {[string]: any})
 
     assert(typeof(data) == 'table', 'Data needs to be an table.')

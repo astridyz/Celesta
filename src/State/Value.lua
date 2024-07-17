@@ -29,7 +29,7 @@ local function Value<data>(initialData: data?): Value<unknown, data>
         end
 
         currentData = data
-        Update(Value)
+        Update(Class)
     end
 
     function Class:get()

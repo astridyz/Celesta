@@ -6,19 +6,32 @@ local function Select(args: {any}, ...: string): (any, any, any, any)
     for index, targetType in types do
 
         if args[index] == nil then
-            table.insert(result, false)
+
+            if result[index] then
+                result[index + 1] = false
+            else
+                result[index] = false
+            end
+
             continue
         end
 
         if typeof(args[index]) ~= targetType then
-            table.insert(result, false)
+
+            if typeof(args[index]) == types[index + 1] then
+
+                result[index + 1] = args[index]
+                continue
+            end
+
+            result[index] = false
             continue
         end
 
-        table.insert(result, args[index])
+        result[index] = args[index]
     end
 
-    return table.unpack(result)
+    return result[1], result[2], result[3], result[4]
 end
 
 return Select

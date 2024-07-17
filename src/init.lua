@@ -2,6 +2,7 @@ local Types = require(script.Types)
 
 export type World = Types.World
 export type Trait = Types.Trait
+export type Entity = Types.Entity
 
 export type Component = Types.Component
 export type Datatype = Types.Datatype

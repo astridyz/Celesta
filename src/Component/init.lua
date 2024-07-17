@@ -22,7 +22,7 @@ local function Component(...): Component
     name = name or debug.info(2, "s") :: string .. "@" .. debug.info(2, "l")
 
     assert(
-        default == nil or typeof(default) == 'table',
+        default == nil or typeof(default) == 'boolean' or typeof(default) == 'table',
         'If default data is provided, it must be a table'
     )
 

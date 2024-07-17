@@ -29,25 +29,31 @@ local function World(): World
     local function ApplyTraits(entity: Entity)
         debug.profilebegin('apply trait')
 
-        for componentSet, trait in World._traits do
+		for componentSet, trait in World._traits do
 
             --// If entity has the trait requirements
-            if entity.Has(table.unpack(componentSet) :: Component) then
-            
+            if entity.Has(componentSet) then
+
                 --// If its applied we continue
-                if trait.IsApplied(entity) then
+				if trait.IsApplied(entity) then
                     continue
-                end
+				end
 
                 --// If its not we apply
-                trait.Apply(entity, World)
-                continue
-            end
+                trait.Apply(
+                    entity,
+                    World,
+                    --// Sending all datatypes from the trait requirements
+                    --// The order is the parameters of the .Intersect() function
+                    entity.Get(table.unpack(componentSet))
+                )
 
+                continue
+			end
+			
             --// If it is applied and the entity doesnt have the requirements
             --// anymore, we remove the trait
-            if trait.IsApplied(entity) then
-                
+			if trait.IsApplied(entity) then
                 trait.Remove(entity)
             end
         end
@@ -105,7 +111,7 @@ local function World(): World
     local function removeDataFromEntity(entity, ...)
         for _, object in { ... } do
             
-            if not (typeof(object) == 'table') then
+            if typeof(object) ~= 'table' then
                 continue
             end
 
@@ -129,7 +135,8 @@ local function World(): World
         local results = {} :: {boolean | Datatype}
 
         for _, component in { ... } do
-            local datatype = entity._storage[component.name]
+
+            local datatype = entity._storage[component.Name]
 
             if not datatype then
                 table.insert(results, false)
@@ -215,9 +222,9 @@ local function World(): World
                 end
 
                 --// If is a component, we check it
-                if object.Kind 'Component' then
-
-                    if Entity._storage[object.Name] == nil then
+                if object.Kind == 'Component' then
+                    
+                    if not Entity._storage[object.Name] then
                         return false
                     end
 
@@ -280,7 +287,7 @@ local function World(): World
 
         print('Spawning entity:', entity)
 
-        addDataToEntity(entity, args)
+        addDataToEntity(entity, table.unpack(args))
 
         ApplyTraits(entity)
 

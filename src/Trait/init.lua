@@ -33,30 +33,31 @@ local function Trait<Req...>(
 
     ExchangeDependencyAll(Trait, reqComponents)
 
-    function Trait.Apply(entity, world)
+    function Trait.Apply(entity: Entity, world, ...)
         local entityScope = Scoped()
 
-        local thread = task.spawn(initter, entity, world, entityScope)
+        Trait._applied[entity._id] = entityScope
 
-        entityScope:Insert(thread)
-
-        Trait._applied[entity] = entityScope
+        local thread = task.spawn(initter, entity, world, entityScope, ...)
+        entityScope.Insert(thread)
     end
 
-    function Trait.Remove(entity)
-        local entityScope = Trait._applied[entity]
+    function Trait.Remove(entity: Entity)
+        local entityScope = Trait._applied[entity._id]
 
         Cleanup(entityScope)
     end
 
-    function Trait.IsApplied(entity)
-        return Trait._applied[entity] and true or false
+    function Trait.IsApplied(entity: Entity)
+        local entityScope = Trait._applied[entity._id]
+
+        return entityScope and true or false
     end
 
     function Trait.Destruct()
 
-        for entity in Trait._applied do
-            Trait.Remove(entity :: Entity)
+        for _, entityScope in Trait._applied do
+            Cleanup(entityScope)
         end
 
         ClearStateObject(Trait)

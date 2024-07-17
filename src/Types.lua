@@ -45,9 +45,9 @@ export type Intersection<Reqs...> = (Reqs...) -> ()
 
 export type Trait = State & {
     Kind: 'Trait',
-    _applied: {[Entity]: Scoped<unknown, unknown>},
+    _applied: {[ID]: Scoped<unknown, unknown>},
     _requirements: {Component},
-    Apply: (entity: Entity, world: World) -> (),
+    Apply: (entity: Entity, world: World, ...Datatype) -> (),
     Remove: (entity: Entity) -> (),
     IsApplied: (entity: Entity) -> boolean
 }
