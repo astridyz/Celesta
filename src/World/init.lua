@@ -68,23 +68,31 @@ local function World(): World
     end
     
     local function addDatatypeToEntity(entity, datatype)
+
+        assert(
+            datatype.Kind or datatype.Kind == 'Datatype',
+            'Attempt to add a invalid datatype to entity'
+        )
+
         local name = datatype._name
         
         entity._storage[name] = datatype
     end
 
+    local function addDataGroupToEntity(entity, group)
+        for _, object in group do
+            addDatatypeToEntity(entity, object)
+        end
+    end
+
     local function addDataToEntity(entity, ...)
         for _, object in { ... } do
-            
-            if typeof(object) ~= 'table' then
-                continue
-            end
-
+        
             --// In case there's no Kind, it must be a array of datatypes
             --// Then, we loop over it to find every datatype on this array
             if not object.Kind then
-                
-                addDataToEntity(entity, table.unpack(object))
+            
+                addDataGroupToEntity(entity, object)
                 continue
             end
 
@@ -110,10 +118,6 @@ local function World(): World
 
     local function removeDataFromEntity(entity, ...)
         for _, object in { ... } do
-            
-            if typeof(object) ~= 'table' then
-                continue
-            end
 
             if not object.Kind then
 
@@ -177,7 +181,7 @@ local function World(): World
             _dependents = {}
         } :: Entity
 
-        function Entity.Add(...: Datatype)
+        function Entity.Add(...: Datatype | {Datatype})
             addDataToEntity(Entity, ...)
 
             ApplyTraits(Entity)
@@ -285,9 +289,9 @@ local function World(): World
             entity = GenerateEntity()
         end
 
-        print('Spawning entity:', entity)
+        addDataToEntity(entity, table.unpack(args :: {Datatype}))
 
-        addDataToEntity(entity, table.unpack(args))
+        print('Spawning entity:', entity)
 
         ApplyTraits(entity)
 

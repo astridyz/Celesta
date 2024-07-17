@@ -10,7 +10,7 @@ local function joinData<config, target>(config: config, target: target): config 
             continue
         end
 
-        if typeof(target[index]) == 'table' then
+        if typeof(target[index]) == 'table' and typeof(config[index]) == 'table' then
             target[index] = joinData(config[index], target[index])
         end
     end

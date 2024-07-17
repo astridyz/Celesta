@@ -58,7 +58,7 @@ export type Entity = State & {
     Kind: 'Entity',
     _id: ID,
     _storage: {[string]: Datatype},
-    Add: (...Datatype) -> Entity,
+    Add: (...Datatype | {[any]: Datatype}) -> Entity,
     Remove: (...Component | Bundle | {[any]: Component}) -> Entity,
     ChildOf: (targetEntity: Entity) -> Entity,
     Get: EntityGet,
