@@ -3,14 +3,13 @@ local function joinData<config, target>(config: config, target: target): config 
     assert(type(target) == 'table', 'Target needs to be a table.')
     assert(type(config) == 'table', 'Config needs to be a table.')
 
-    for index, default in config do
+    for index, default in pairs(config) do
 
         if not target[index] then
             target[index] = default
-            continue
         end
 
-        if typeof(target[index]) == 'table' and typeof(config[index]) == 'table' then
+        if typeof(target[index]) == 'table' then
             target[index] = joinData(config[index], target[index])
         end
     end

@@ -1,106 +1,104 @@
 --!strict
-export type Data = {[string]: any}
+export type Dict<I, V> = {[I]: V}
+export type Array<V> = {[number]: V}
 
 export type State = {
-    _dependencies: {[any]: boolean},
-    _dependents: {[{destroy: <S>(self: S) -> ()}]: boolean},
+    _dependencySet: Dict<State, boolean>,
+
     Destruct: () -> ()
 }
 
-export type useFunction = <data>(addValue: {get: () -> data}) -> data
+export type Scoped<D> = Array<unknown> & D
 
-export type Value<O, D = any> = State & {
-    Kind: 'Value',
-    set: (self: O, data: any, force: boolean?) -> (),
-    get: (self: O) -> D,
+export type Value<D> = State & {
+    Get: () -> D,
+    Set: (data: any, force: boolean?) -> (),
 }
 
-export type Scoped<O, D> = State & D & {State} & {
-    Kind: 'Scoped',
-    Computed: (self: O, value: Value<unknown, unknown>, result: (use: useFunction) -> ...any) -> Computed,
-    Value: <data>(self: O, initialData: data) -> Value<unknown, data>,
-    Insert: (...any) -> ()
+export type Computed<D> = State & {
+    Get: () -> D
 }
 
-export type Computed = State & {
-    Kind: 'Computed',
-    Update: () -> ()
-}
+export type Merging = Dict<string, unknown>
 
-export type World = {
-    Kind: 'World',
-    _entities: {[ID]: Entity},
-    _traits: {[{Component}]: Trait},
-    Size: number,
-    Get: (entityID: ID) -> Entity?,
-    ScheduleTrait: (...Trait) -> (),
-
-    Entity: ((identifier: Instance, ...Datatype | {[any]: Datatype}) -> Entity)
-    & ((...Datatype | {[any]: Datatype}) -> Entity),
-
-    Despawn: (entityID: ID) -> ()
-}
-
-export type Intersection<Reqs...> = (Reqs...) -> ()
-
-export type Trait = State & {
-    Kind: 'Trait',
-    _applied: {[ID]: Scoped<unknown, unknown>},
-    _requirements: {Component},
-    Apply: (entity: Entity, world: World, ...Datatype) -> (),
-    Remove: (entity: Entity) -> (),
-    IsApplied: (entity: Entity) -> boolean
-}
-
-export type ID = number | Instance
-
-export type Entity = State & {
-    Kind: 'Entity',
-    _id: ID,
-    _storage: {[string]: Datatype},
-    Add: (...Datatype | {[any]: Datatype}) -> Entity,
-    Remove: (...Component | Bundle | {[any]: Component}) -> Entity,
-    ChildOf: (targetEntity: Entity) -> Entity,
-    Get: EntityGet,
-
-    Has: ((...Component | Bundle | {Component}) -> boolean),
-
-    Clear: () -> (),
-    Destruct: () -> ()
-}
-
-export type EntityGet = ((component: Component) -> Datatype)
-& ((component1: Component, component2: Component) -> (Datatype, Datatype))
-& ((component1: Component, component2: Component, component3: Component) -> (Datatype, Datatype, Datatype))
-& ((component1: Component, component2: Component, component3: Component, component4: Component) -> (Datatype, Datatype, Datatype, Datatype))
-& ((component1: Component, component2: Component, component3: Component, component4: Component, component5: Component) -> (Datatype, Datatype, Datatype, Datatype, Datatype))
-
-export type Component = typeof(setmetatable(
+export type Component<D> = typeof(setmetatable(
     {} :: {
-        Instantiate: (defaultData: Data?) -> Datatype,
-        Name: string,
-        Kind: 'Component'
+        _name: string,
+        _id: number,
+
+        New: (data: Merging?) -> D,
     },
     {} :: {
-        __call: (self: unknown, defaultData: Data?) -> Datatype
+        __call: (self: Component<D>, data: Merging?) -> D
     }
 ))
 
-export type Datatype = Scoped<unknown, {
-    Kind: 'Datatype',
+export type ComponentData<D> = Scoped<D & {
     _name: string,
-    [string]: Value<unknown, unknown>
+    _id: number,
+
+    Value: <data>(scope: Dict<unknown, unknown>, initialData: data?) -> Value<data>,
+    Computed: <data>(scope: Dict<unknown, unknown>, result: (use: <VD>(value: Value<VD>) -> VD) -> D) -> Computed<D>,
+    Clean: (scope: Dict<unknown, unknown>) -> (),
 }>
 
-export type Bundle = typeof(setmetatable(
+export type Query<Q...> = {
+    _no: Dict<number, Component<unknown>>,
+    _need: Dict<number, Component<unknown>>,
+
+    No: (self: Query<Q...>, ...Component<unknown>) -> Query<Q...>,
+    Match: (self: Query<Q...>, storage: Dict<number, Component<unknown>>) -> boolean,
+
+    --// This property doesnt really exist,
+    --// it just holds the typepack
+    _: (Q...) -> ()
+
+}
+
+export type Trait = typeof(setmetatable(
     {} :: {
-        Kind: 'Bundle',
-        Use: (...Datatype) -> {[string]: Datatype},
-        _set: {Component}
+        _entityMap: Dict<unknown, Scoped<unknown>>,
+        _query: Query<unknown>,
+
+        Kind: 'Trait',
+
+        Apply: (entity: Entity, world: World, ...ComponentData<unknown>) -> (),
+        Remove: (entity: Entity) -> (),
+        isApplied: (entity: Entity) -> boolean
     },
     {} :: {
-        __call: (self: unknown, ...Datatype) -> {[string]: Datatype}
+        __call: (self: Trait, ...any) -> ()
     }
 ))
+
+export type Entity = {
+    _id: number,
+    _world: World,
+    _storage: Dict<number, ComponentData<unknown>>,
+
+    Get: EntityGet,
+    Add: (self: Entity, ...ComponentData<unknown>) -> (),
+    Remove: (self: Entity, ...Component<unknown>) -> (),
+    Clear: (self: Entity) -> (),
+    Destruct: (self: Entity) -> ()
+}
+
+export type EntityGet = (<D>(self: Entity, component: Component<D>) -> ComponentData<D>)
+& (<D, D1>(self: Entity, component: Component<D>, component1: Component<D1>) -> (ComponentData<D>, ComponentData<D1>))
+& (<D, D1, D2>(self: Entity, component: Component<D>, component1: Component<D1>, component2: Component<D2>) -> (ComponentData<D>, ComponentData<D1>, ComponentData<D2>))
+& (<D, D1, D2, D3>(self: Entity, component: Component<D>, component1: Component<D1>, component2: Component<D2>, component3: Component<D3>) -> (ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>))
+& (<D, D1, D2, D3, D4>(self: Entity, component: Component<D>, component1: Component<D1>, component2: Component<D2>, component3: Component<D3>, component4: Component<D4>) -> (ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>))
+& (<D, D1, D2, D3, D4, D5>(self: Entity, component: Component<D>, component1: Component<D1>, component2: Component<D2>, component3: Component<D3>, component4: Component<D4>, component5: Component<D5>) -> (ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>, ComponentData<D5>))
+& (<D, D1, D2, D3, D4, D5, D6>(self: Entity, component: Component<D>, component1: Component<D1>, component2: Component<D2>, component3: Component<D3>, component4: Component<D4>, component5: Component<D5>, component6: Component<D6>) -> (ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>, ComponentData<D5>, ComponentData<D6>))
+
+export type World = {
+    _storage: Dict<number, Entity>,
+    _traits: Dict<Query<unknown>, Trait>,
+    _nextId: number,
+    _applyTraits: (self: World, entity: Entity) -> (),
+
+    Import: (self: World, ...Trait | {Trait}) -> (),
+    Entity: (self: World, ...ComponentData<unknown>) -> Entity
+}
 
 return 0

@@ -1,5 +1,5 @@
-local function updateAll(target, ...: any?)
-    for dependent in target._dependents do
+local function updateAll(target, ...)
+    for dependent in target._dependentSet do
 
         local depType = typeof(dependent)
 
