@@ -8,28 +8,21 @@ type Query<Q...> = Types.Query<Q...>
 type Component<D> = Types.Component<D>
 type ComponentData<D> = Types.ComponentData<D>
 
-local function ToDict(object)
-    local dict = {}
-
+local function checkAndSolve(object)
     for index, component in object do
-
         AssertComponent(component, index)
-
-        local id = component._id
-        
-        dict[id] = component
     end
-
-    return dict
 end
 
 local Query  = {}
 Query.__index = Query
 
 local function NewQuery(...)
+    checkAndSolve({ ... })
+
     local query = {
         _no = {},
-        _need = ToDict({...})
+        _need = { ... }
     }
 
     setmetatable(query, Query)
@@ -38,7 +31,9 @@ local function NewQuery(...)
 end
 
 function Query:No(...: Component<unknown>)
-    self._no = ToDict({...})
+    checkAndSolve({ ... })
+
+    self._no = { ... }
 
     return Query
 end
@@ -47,14 +42,18 @@ function Query:Match(storage)
     
     self = self :: Query<unknown>
 
-    for componentId, _ in self._need do
-        if not storage[componentId] then
+    for _, component in self._need do
+        local id = component._id
+
+        if not storage[id] then
             return false
         end
     end
 
-    for componentId, _ in self._no do
-        if storage[componentId] then
+    for _, component in self._no do
+        local id = component._id
+
+        if storage[id] then
             return false
         end
     end

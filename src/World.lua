@@ -1,4 +1,6 @@
 --// Packages
+local unpack = unpack
+
 local Component = require(script.Parent.Component)
 local AssertComponentData = Component.AssertComponentData
 local AssertComponent = Component.AssertComponent
@@ -16,6 +18,7 @@ type Dict<I, V> = Types.Dict<I, V>
 
 local Entity = {}
 Entity.__index = Entity
+Entity.Kind = 'Entity'
 
 local function NewEntity(world: World): Entity
     local nextId = world._nextId
@@ -85,7 +88,7 @@ function Entity:Get(...: Component<unknown>)
         table.insert(results, datatype)
     end
 
-    return table.unpack(results)
+    return unpack(results)
 end
 
 function Entity:Clear()
@@ -130,16 +133,16 @@ function World:_applyTraits(entity: Entity)
     
         if query:Match(entity._storage) then
             
-            if trait.isApplied(entity) then
+            if trait:isApplied(entity) then
                 continue
             end
 
-            trait(entity, self, entity:Get(table.unpack(query._need)))
+            trait(entity, self, entity:Get(unpack(query._need)))
             continue
         end
 
-        if trait.isApplied(entity) then
-            trait.Remove(entity)
+        if trait:isApplied(entity) then
+            trait:Remove(entity)
         end
     end
 end
@@ -170,6 +173,31 @@ function World:Entity(...: ComponentData<unknown>)
 
     self._storage[entity._id] = entity
     return entity
+end
+
+function World:Get(ID: number)
+    
+    self = self :: World
+
+    local entity = self._storage[ID]
+
+    if not entity then
+        return
+    end
+
+    return entity
+end
+
+function World:Despawn(ID: number)
+    self = self :: World
+
+    local entity = self:Get(ID)
+
+    if not entity then
+        return
+    end
+
+    entity:Destruct()
 end
 
 return NewWorld

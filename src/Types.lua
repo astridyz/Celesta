@@ -43,8 +43,8 @@ export type ComponentData<D> = Scoped<D & {
 }>
 
 export type Query<Q...> = {
-    _no: Dict<number, Component<unknown>>,
-    _need: Dict<number, Component<unknown>>,
+    _no: Array<Component<unknown>>,
+    _need: Array<Component<unknown>>,
 
     No: (self: Query<Q...>, ...Component<unknown>) -> Query<Q...>,
     Match: (self: Query<Q...>, storage: Dict<number, Component<unknown>>) -> boolean,
@@ -59,15 +59,16 @@ export type Trait = typeof(setmetatable(
     {} :: {
         _entityMap: Dict<unknown, Scoped<unknown>>,
         _query: Query<unknown>,
+        _initter: (...any) -> (),
 
         Kind: 'Trait',
 
-        Apply: (entity: Entity, world: World, ...ComponentData<unknown>) -> (),
-        Remove: (entity: Entity) -> (),
-        isApplied: (entity: Entity) -> boolean
+        Apply: (self: Trait, entity: Entity, world: World, ...ComponentData<unknown>) -> (),
+        Remove: (self: Trait, entity: Entity) -> (),
+        isApplied: (self: Trait, entity: Entity) -> boolean
     },
     {} :: {
-        __call: (self: Trait, ...any) -> ()
+        __call: (self: Trait, entity: Entity, world: World, ...ComponentData<unknown>) -> ()
     }
 ))
 
@@ -75,6 +76,8 @@ export type Entity = {
     _id: number,
     _world: World,
     _storage: Dict<number, ComponentData<unknown>>,
+
+    Kind: 'Entity',
 
     Get: EntityGet,
     Add: (self: Entity, ...ComponentData<unknown>) -> (),
@@ -98,7 +101,9 @@ export type World = {
     _applyTraits: (self: World, entity: Entity) -> (),
 
     Import: (self: World, ...Trait | {Trait}) -> (),
-    Entity: (self: World, ...ComponentData<unknown>) -> Entity
+    Entity: (self: World, ...ComponentData<unknown>) -> Entity,
+    Get: (self: World, ID: number) -> Entity?,
+    Despawn: (self: World, ID: number) -> (),
 }
 
 return 0

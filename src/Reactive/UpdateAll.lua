@@ -1,16 +1,17 @@
-local function updateAll(target, ...)
-    for dependent in target._dependentSet do
+local function UpdateAll(target)
+
+    for dependent in target._dependencySet do
 
         local depType = typeof(dependent)
 
         if depType == 'function' then
-            dependent(...)
+            dependent()
         end
 
         if depType == 'table' and dependent.Update then
-            dependent.Update(...)
+            dependent.Update()
         end
     end
 end
 
-return updateAll
+return UpdateAll
