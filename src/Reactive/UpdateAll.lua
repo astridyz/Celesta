@@ -1,15 +1,17 @@
-local function UpdateAll(target)
+--!strict
+--// Packages
+local Types = require(script.Parent.Parent.Types)
+
+local function UpdateAll(target: Types.State)
 
     for dependent in target._dependencySet do
 
-        local depType = typeof(dependent)
-
-        if depType == 'function' then
+        if typeof(dependent) == 'table' and dependent.Update then
+            dependent:Update()
+        
+        elseif typeof(dependent) == 'function' then
             dependent()
-        end
 
-        if depType == 'table' and dependent.Update then
-            dependent.Update()
         end
     end
 end

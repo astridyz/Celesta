@@ -1,7 +1,6 @@
 --// Packages
-local unpack = unpack
-
 local Component = require(script.Parent.Component)
+
 local AssertComponentData = Component.AssertComponentData
 local AssertComponent = Component.AssertComponent
 
@@ -9,10 +8,10 @@ local Types = require(script.Parent.Types)
 type World = Types.World
 type Entity = Types.Entity
 
+type Trait = Types.Trait
+
 type Component<D> = Types.Component<D>
 type ComponentData<D> = Types.ComponentData<D>
-
-type Trait = Types.Trait
 
 type Dict<I, V> = Types.Dict<I, V>
 
@@ -35,8 +34,7 @@ local function NewEntity(world: World): Entity
     return newEntity :: any
 end
 
-function Entity:Add(...: ComponentData<unknown>)
-    self = self :: Entity
+function Entity.Add(self: Entity, ...: ComponentData<unknown>)
 
     for index, data in { ... } do
 
@@ -51,8 +49,7 @@ function Entity:Add(...: ComponentData<unknown>)
     self._world:_applyTraits(self)
 end
 
-function Entity:Remove(...: Component<unknown>)
-    self = self :: Entity
+function Entity.Remove(self: Entity, ...: Component<unknown>)
 
     for index, component in { ... } do
         
@@ -69,9 +66,7 @@ function Entity:Remove(...: Component<unknown>)
     self._world:_applyTraits(self)
 end
 
-function Entity:Get(...: Component<unknown>)
-    self = self :: Entity
-
+function Entity.Get(self: Entity, ...: Component<unknown>)
     local results = {}
 
     for index, component in { ... } do
@@ -91,8 +86,7 @@ function Entity:Get(...: Component<unknown>)
     return unpack(results)
 end
 
-function Entity:Clear()
-    self = self :: Entity
+function Entity.Clear(self: Entity)
 
     for index, data in self._storage do
         
@@ -105,7 +99,7 @@ function Entity:Clear()
     self._world:_applyTraits(self)
 end
 
-function Entity:Destruct()
+function Entity.Destruct(self: Entity)
     self:Clear()
 
     table.clear(self)
@@ -114,7 +108,7 @@ end
 local World = {}
 World.__index = World
 
-local function NewWorld(): Types.World
+local function NewWorld(): World
     local world = {
         _storage = {},
         _traits = {},
@@ -126,8 +120,7 @@ local function NewWorld(): Types.World
     return world :: any
 end
 
-function World:_applyTraits(entity: Entity)
-    self = self :: World
+function World._applyTraits(self: World, entity: Entity)
 
     for query, trait in self._traits do
     
@@ -137,7 +130,7 @@ function World:_applyTraits(entity: Entity)
                 continue
             end
 
-            trait(entity, self, entity:Get(unpack(query._need)))
+            trait(entity, self, entity:Get(table.unpack(query._need)))
             continue
         end
 
@@ -147,7 +140,7 @@ function World:_applyTraits(entity: Entity)
     end
 end
 
-function World:Import(...: Trait | {Trait})
+function World.Import(self: World, ...: Trait | {Trait})
     for _, object in { ... } do
         
         assert(typeof(object) == 'table', 'Invalid trait type: not a table')
@@ -166,7 +159,7 @@ function World:Import(...: Trait | {Trait})
     end
 end
 
-function World:Entity(...: ComponentData<unknown>)
+function World.Entity(self: World, ...: ComponentData<unknown>)
     local entity = NewEntity(self)
 
     entity:Add(...)
@@ -175,10 +168,7 @@ function World:Entity(...: ComponentData<unknown>)
     return entity
 end
 
-function World:Get(ID: number)
-    
-    self = self :: World
-
+function World.Get(self: World, ID: number)
     local entity = self._storage[ID]
 
     if not entity then
@@ -188,9 +178,7 @@ function World:Get(ID: number)
     return entity
 end
 
-function World:Despawn(ID: number)
-    self = self :: World
-
+function World.Despawn(self: World, ID: number)
     local entity = self:Get(ID)
 
     if not entity then

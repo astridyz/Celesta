@@ -1,4 +1,8 @@
-local function Clean(object)
+--!strict
+--// Packages
+local Types = require(script.Parent.Parent.Types)
+
+local function Clean(object: Types.Cleaning)
 
     if typeof(object) == 'function' then
         object()

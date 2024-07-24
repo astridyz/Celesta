@@ -1,5 +1,7 @@
+--!strict
 --// Packages
 local Component = require(script.Parent.Component)
+
 local AssertComponent = Component.AssertComponent
 
 local Types = require(script.Parent.Types)
@@ -30,7 +32,7 @@ local function NewQuery(...)
     return query
 end
 
-function Query:No(...: Component<unknown>)
+function Query.No(self: Query<unknown>, ...: Component<unknown>)
     checkAndSolve({ ... })
 
     self._no = { ... }
@@ -38,10 +40,7 @@ function Query:No(...: Component<unknown>)
     return Query
 end
 
-function Query:Match(storage)
-    
-    self = self :: Query<unknown>
-
+function Query.Match(self: Query<unknown>, storage)
     for _, component in self._need do
         local id = component._id
 
@@ -61,10 +60,4 @@ function Query:Match(storage)
     return true
 end
 
-return NewQuery :: (<D>(component: Component<D>) -> Query<ComponentData<D>>)
-& (<D, D1>(component: Component<D>, component2: Component<D1>) -> Query<ComponentData<D>, ComponentData<D1>>)
-& (<D, D1, D2>(component: Component<D>, component2: Component<D1>, component3: Component<D2>) -> Query<ComponentData<D>, ComponentData<D1>, ComponentData<D2>>)
-& (<D, D1, D2, D3>(component: Component<D>, component2: Component<D1>, component3: Component<D2>, component4: Component<D3>) -> Query<ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>>)
-& (<D, D1, D2, D3, D4>(component: Component<D>, component2: Component<D1>, component3: Component<D2>, component4: Component<D3>, component5: Component<D4>) -> Query<ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>>)
-& (<D, D1, D2, D3, D4, D5>(component: Component<D>, component2: Component<D1>, component3: Component<D2>, component4: Component<D3>, component5: Component<D4>, component6: Component<D5>) -> Query<ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>, ComponentData<D5>>)
-& (<D, D1, D2, D3, D4, D5, D6>(component: Component<D>, component2: Component<D1>, component3: Component<D2>, component4: Component<D3>, component5: Component<D4>, component6: Component<D5>, component7: Component<D6>) -> Query<ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>, ComponentData<D5>, ComponentData<D6>>)
+return (NewQuery :: any) :: Types.QueryConstructor

@@ -2,22 +2,35 @@
 export type Dict<I, V> = {[I]: V}
 export type Array<V> = {[number]: V}
 
-export type State = {
-    _dependencySet: Dict<State, boolean>,
+type Dependency = State & {Update: (...any) -> ...any}
 
-    Destruct: () -> ()
+export type State = {
+    _dependencySet: Dict<Dependency | (...any) -> ...any, boolean>,
+
+    Destruct: (self: State) -> ()
 }
 
 export type Scoped<D> = Array<unknown> & D
 
 export type Value<D> = State & {
-    Get: () -> D,
-    Set: (data: any, force: boolean?) -> (),
+    Get: (self: Value<D>) -> D?,
+    Set: (self: Value<D>, data: any, force: boolean?) -> (),
 }
 
 export type Computed<D> = State & {
-    Get: () -> D
+    Get: (self: Computed<D>) -> D,
+    Update: (self: Computed<D>) -> ()
 }
+
+export type Cleaning = Instance
+    | RBXScriptConnection
+    | (...any) -> ...any
+    | {destroy: (unknown) -> ()}
+    | {Destroy: (unknown) -> ()}
+    | {Destruct: (unknown) -> ()}
+    | {Cleaning}
+    | Array<unknown>
+    | Dict<unknown, unknown>
 
 export type Merging = Dict<string, unknown>
 
@@ -52,8 +65,15 @@ export type Query<Q...> = {
     --// This property doesnt really exist,
     --// it just holds the typepack
     _: (Q...) -> ()
-
 }
+
+export type QueryConstructor = (<D>(component: Component<D>) -> Query<ComponentData<D>>)
+& (<D, D1>(component: Component<D>, component2: Component<D1>) -> Query<ComponentData<D>, ComponentData<D1>>)
+& (<D, D1, D2>(component: Component<D>, component2: Component<D1>, component3: Component<D2>) -> Query<ComponentData<D>, ComponentData<D1>, ComponentData<D2>>)
+& (<D, D1, D2, D3>(component: Component<D>, component2: Component<D1>, component3: Component<D2>, component4: Component<D3>) -> Query<ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>>)
+& (<D, D1, D2, D3, D4>(component: Component<D>, component2: Component<D1>, component3: Component<D2>, component4: Component<D3>, component5: Component<D4>) -> Query<ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>>)
+& (<D, D1, D2, D3, D4, D5>(component: Component<D>, component2: Component<D1>, component3: Component<D2>, component4: Component<D3>, component5: Component<D4>, component6: Component<D5>) -> Query<ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>, ComponentData<D5>>)
+& (<D, D1, D2, D3, D4, D5, D6>(component: Component<D>, component2: Component<D1>, component3: Component<D2>, component4: Component<D3>, component5: Component<D4>, component6: Component<D5>, component7: Component<D6>) -> Query<ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>, ComponentData<D5>, ComponentData<D6>>)
 
 export type Trait = typeof(setmetatable(
     {} :: {

@@ -19,7 +19,7 @@ local GlobalDataMethods = {
 
 local function Component<data>(default: data?): Types.Component<data>
 
-    local name = debug.info(2, 's') .. debug.info(2, 'l')
+    local name = debug.info(2, 's') :: string .. debug.info(2, 'l')
 
     assert(
         default == nil or typeof(default) == 'table',
