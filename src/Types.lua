@@ -12,6 +12,14 @@ export type State = {
 
 export type Scoped<D> = Array<unknown> & D
 
+export type ScopedConstructor = (() -> Scoped<{}>)
+& (<A>(A & {}) -> Scoped<A>)
+& (<A, B>(A & {}, B & {}) -> Scoped<A & B>)
+& (<A, B, C>(A & {}, B & {}, C & {}) -> Scoped<A & B & C>)
+& (<A, B, C, D>(A & {}, B & {}, C & {}, D & {}) -> Scoped<A & B & C & D>)
+& (<A, B, C, D, E>(A & {}, B & {}, C & {}, D & {}, E & {}) -> Scoped<A & B & C & D & E>)
+& (<A, B, C, D, E, F>(A & {}, B & {}, C & {}, D & {}, E & {}, F & {}) -> Scoped<A & B & C & D & E & F>)
+
 export type Value<D> = State & {
     Get: (self: Value<D>) -> D?,
     Set: (self: Value<D>, data: any, force: boolean?) -> (),

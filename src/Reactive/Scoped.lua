@@ -1,3 +1,4 @@
+--!strict
 --// Packages
 local JoinData = require(script.Parent.Parent.Utils.JoinData)
 
@@ -22,10 +23,4 @@ local function Scope(...: Types.Dict<unknown, unknown>)
     return scope
 end
 
-return Scope :: (() -> Scoped<{}>)
-& (<A>(A & {}) -> Scoped<A>)
-& (<A, B>(A & {}, B & {}) -> Scoped<A & B>)
-& (<A, B, C>(A & {}, B & {}, C & {}) -> Scoped<A & B & C>)
-& (<A, B, C, D>(A & {}, B & {}, C & {}, D & {}) -> Scoped<A & B & C & D>)
-& (<A, B, C, D, E>(A & {}, B & {}, C & {}, D & {}, E & {}) -> Scoped<A & B & C & D & E>)
-& (<A, B, C, D, E, F>(A & {}, B & {}, C & {}, D & {}, E & {}, F & {}) -> Scoped<A & B & C & D & E & F>)
+return (Scope :: any) :: Types.ScopedConstructor

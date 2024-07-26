@@ -112,7 +112,7 @@ local function NewWorld(): World
     local world = {
         _storage = {},
         _traits = {},
-        _nextId = 0
+        _nextId = 1
     }
 
     setmetatable(world, World)
@@ -161,10 +161,10 @@ end
 
 function World.Entity(self: World, ...: ComponentData<unknown>)
     local entity = NewEntity(self)
+    self._storage[entity._id] = entity
 
     entity:Add(...)
 
-    self._storage[entity._id] = entity
     return entity
 end
 
