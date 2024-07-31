@@ -31,11 +31,6 @@ local function Value<data>(
         UpdateAll(Value)
     end
 
-    function Value:Destruct()
-        Destruct(Value)
-        table.clear(Value)
-    end
-
     table.insert(scope :: {}, Value.Destruct)
 
     return Value

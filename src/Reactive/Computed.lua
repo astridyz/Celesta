@@ -7,7 +7,7 @@ type Dict<I, V> = Types.Dict<I, V>
 
 local function Computed<D>(
     scope: Dict<unknown, unknown>,
-    result: (use: <VD>(value: Types.Value<VD>) -> VD?) -> D
+    processor: (use: <VD>(value: Types.Value<VD>) -> VD?) -> D
 ): Types.Computed<D>
 
     local Computed = {
@@ -28,7 +28,7 @@ local function Computed<D>(
     end
 
     function Computed:Update()
-        currentData = result(Use)
+        currentData = processor(Use)
     end
 
     table.insert(scope :: {}, Computed.Destruct)

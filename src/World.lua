@@ -124,7 +124,7 @@ function World._applyTraits(self: World, entity: Entity)
 
     for query, trait in self._traits do
     
-        if query:Match(entity._storage) then
+        if query:Match(entity._id, entity._storage) then
             
             if trait:isApplied(entity) then
                 continue

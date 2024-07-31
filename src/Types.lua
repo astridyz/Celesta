@@ -63,12 +63,34 @@ export type ComponentData<D> = Scoped<D & {
     Clean: (scope: Dict<unknown, unknown>) -> (),
 }>
 
+export type ScenarioState = number | string
+
+export type ScenarioMatch = (entityID: number) -> boolean
+
+export type Scenario = typeof(setmetatable(
+    {} :: {
+        _tracking: Dict<number, ScenarioState>,
+        _order: Array<ScenarioState>,
+        _states: Dict<ScenarioState, number>,
+
+        Kind: 'Scenario',
+
+        Patch: (self: Scenario, entity: Entity) -> (),
+        Next: (self: Scenario, entity: Entity) -> ()
+    },
+    {} :: {
+        __call: (self: Scenario, expectedState: ScenarioState, removePrevious: boolean?) -> ScenarioMatch
+    }
+))
+
 export type Query<Q...> = {
     _no: Array<Component<unknown>>,
+    _on: Array<ScenarioMatch>,
     _need: Array<Component<unknown>>,
 
     No: (self: Query<Q...>, ...Component<unknown>) -> Query<Q...>,
-    Match: (self: Query<Q...>, storage: Dict<number, Component<unknown>>) -> boolean,
+    On: (self: Query<Q...>, ...ScenarioMatch) -> Query<Q...>,
+    Match: (self: Query<Q...>, entityID: number, storage: Dict<number, Component<unknown>>) -> boolean,
 
     --// This property doesnt really exist,
     --// it just holds the typepack

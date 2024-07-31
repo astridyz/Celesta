@@ -10,54 +10,29 @@ Creating components and scheduling traits
 ```lua
 local World = Celesta.World()
 
-local Health = Celesta.Component {
-    --// Default data for this component
-    max = 100,
-    current = 100
+--// Default data for components
+local Velocity = Celesta.Component {
+    current = 16
 }
 
-local Regeneration = Celesta.Component {
-    duration = 5,
-    amount = 10
+local Character = Celesta.Component {
+    model = 'none'
 }
 
-local Query = Celesta.Query(Health, Regeneration)
+local Query = Celesta.Query(Velocity, Character)
 
-local Trait = Celesta.Trait(Query, function(entity, world, scope, health, regeneration)
+local Trait = Celesta.Trait(Query, function(entity, world, scope, velocity, character)
 
-    print('Regenerating', entity, 'health!')
+    local current = velocity.current
 
-    local regenerating = task.spawn(function()
-        local endTime = os.clock() + regeneration.duration:get()
+    local char = character.model:Get()
+    local humanoid = char.Humanoid
 
-        while os.clock() < endTime do
-            task.wait(1)
-
-            local current = health.current:get()
-            local max = health.max:get()
-            local regAmount = regeneration.amount:get()
-
-           if current < max then
-                local rest = math.min(current + regAmount, max)
-
-                health.current:set(rest)
-            end
-        end
-
-        --// Removing the component after the determined duration
-        entity:Remove(Regeneration)
+    --// Everytime "current" changes, the computed
+    --// will change the humanoid walkspeed to the current's value
+    Celesta.Computed(scope, function(use)
+        humanoid.WalkSpeed = use(current)
     end)
-
-        --// In case we remove the trait before the timer ends
-    table.insert(scope, function()
-        task.cancel(regenerating)
-
-        --// Removing the component in case the trait
-        --// was disabled for any other reasons than
-        --// removing the regeneration component
-        entity:Remove(Regeneration)
-    end)
-
 end)
 
 
@@ -67,9 +42,20 @@ World:Import(Trait)
 Spawn entities with sets of components
 
 ```lua
-local entity = World:Entity(
-    Health(),
-    Regeneration()
-)
---> Regenerating entity 1 health!
+local function setupPlayer(player)
+
+    World:Entity(
+        Player(),
+        Velocity(),
+        Instance {
+            roblox = player
+        },
+        Character {
+            model = player.Character
+        }
+    )
+
+end
+
+game.Players.PlayerAdded:Connect(setupPlayer)
 ```
