@@ -72,9 +72,7 @@ export type Scenario = typeof(setmetatable(
         _tracking: Dict<number, ScenarioState>,
         _order: Array<ScenarioState>,
         _states: Dict<ScenarioState, number>,
-
-        Kind: 'Scenario',
-
+        
         Patch: (self: Scenario, entity: Entity) -> (),
         Next: (self: Scenario, entity: Entity) -> ()
     },
@@ -110,9 +108,7 @@ export type Trait = typeof(setmetatable(
         _entityMap: Dict<unknown, Scoped<unknown>>,
         _query: Query<unknown>,
         _initter: (...any) -> (),
-
-        Kind: 'Trait',
-
+        
         Apply: (self: Trait, entity: Entity, world: World, ...ComponentData<unknown>) -> (),
         Remove: (self: Trait, entity: Entity) -> (),
         isApplied: (self: Trait, entity: Entity) -> boolean
@@ -126,8 +122,6 @@ export type Entity = {
     _id: number,
     _world: World,
     _storage: Dict<number, ComponentData<unknown>>,
-
-    Kind: 'Entity',
 
     Get: EntityGet,
     Add: (self: Entity, ...ComponentData<unknown>) -> (),
@@ -150,7 +144,7 @@ export type World = {
     _nextId: number,
     _applyTraits: (self: World, entity: Entity) -> (),
 
-    Import: (self: World, ...Trait | {Trait}) -> (),
+    Import: (self: World, ...Trait) -> (),
     Entity: (self: World, ...ComponentData<unknown>) -> Entity,
     Get: (self: World, ID: number) -> Entity?,
     Despawn: (self: World, ID: number) -> (),

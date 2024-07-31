@@ -10,32 +10,32 @@ type Entity = Types.Entity
 
 local Scenario = {}
 Scenario.__index = Scenario
-Scenario.Kind = 'Scenario'
 
 local function NewScenario(...: ScenarioState): Scenario
     local order = { ... }
     local states = InvertDict(order)
 
-    local scenario = {
+    return (setmetatable({
+
         _tracking = {},
+
         _order = order,
+
         _states = states
-    }
 
-    setmetatable(scenario, Scenario)
-
-    return scenario :: any
+    }, Scenario) :: any) :: Scenario
 end
 
 function Scenario.Patch(self: Scenario, entity: Entity, state: ScenarioState?)
 
     local id = entity._id
-    local world = entity._world
 
     local stateToAdd = state or self._order[1]
     assert(self._states[stateToAdd], 'State not provided at default data.')
 
     self._tracking[id] = stateToAdd
+
+    local world = entity._world
 
     if world then
         world:_applyTraits(entity)
@@ -43,8 +43,8 @@ function Scenario.Patch(self: Scenario, entity: Entity, state: ScenarioState?)
 end
 
 function Scenario.Next(self: Scenario, entity: Entity)
+
     local id = entity._id
-    local world = entity._world
 
     local state = self._tracking[id]
     assert(state, 'Entity is not added to scenario. Cannot perform function')
@@ -57,6 +57,8 @@ function Scenario.Next(self: Scenario, entity: Entity)
     end
 
     self._tracking[id] = nextState
+
+    local world = entity._world
 
     if world then
         world:_applyTraits(entity)

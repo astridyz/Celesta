@@ -16,7 +16,6 @@ type Scoped<D> = Types.Scoped<D>
 
 local Trait = {}
 Trait.__index = Trait
-Trait.Kind = 'Trait'
 
 function Trait.__call(self: Trait, entity, world, ...)
     return self:Apply(entity, world, ...)

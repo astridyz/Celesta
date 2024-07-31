@@ -17,21 +17,19 @@ type Dict<I, V> = Types.Dict<I, V>
 
 local Entity = {}
 Entity.__index = Entity
-Entity.Kind = 'Entity'
 
 local function NewEntity(world: World): Entity
+    
     local nextId = world._nextId
     world._nextId += 1
 
-    local newEntity = {
+    return (setmetatable({
+
         _world = world,
         _storage = {},
         _id = nextId
-    }
 
-    setmetatable(newEntity, Entity)
-
-    return newEntity :: any
+    }, Entity) :: any) :: Entity
 end
 
 function Entity.Add(self: Entity, ...: ComponentData<unknown>)
@@ -109,15 +107,14 @@ local World = {}
 World.__index = World
 
 local function NewWorld(): World
-    local world = {
+
+    return (setmetatable({
+
         _storage = {},
         _traits = {},
         _nextId = 1
-    }
 
-    setmetatable(world, World)
-
-    return world :: any
+    }, World) :: any) :: World
 end
 
 function World._applyTraits(self: World, entity: Entity)
@@ -140,15 +137,10 @@ function World._applyTraits(self: World, entity: Entity)
     end
 end
 
-function World.Import(self: World, ...: Trait | {Trait})
+function World.Import(self: World, ...: Trait)
     for _, object in { ... } do
         
         assert(typeof(object) == 'table', 'Invalid trait type: not a table')
-
-        if not object.Kind or object.Kind ~= 'Trait' then
-            self:Import(object)
-            continue
-        end
 
         local traits = self._traits
         local query = object._query

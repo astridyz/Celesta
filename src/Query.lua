@@ -24,17 +24,16 @@ local Query  = {}
 Query.__index = Query
 
 local function NewQuery(...)
+    
     checkAndSolve({ ... })
 
-    local query = {
+    return setmetatable({
+
         _no = {},
         _on = {},
         _need = { ... }
-    }
 
-    setmetatable(query, Query)
-
-    return query
+    }, Query)
 end
 
 function Query.No(self: Query<unknown>, ...: Component<unknown>)
@@ -46,6 +45,7 @@ function Query.No(self: Query<unknown>, ...: Component<unknown>)
 end
 
 function Query.On(self: Query<unknown>, ...: Types.ScenarioMatch)
+    
     for index, ScenarioMatch in { ... } do
         AssertScenarioMatch(ScenarioMatch, index)
     end
