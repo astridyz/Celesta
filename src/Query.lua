@@ -1,9 +1,9 @@
 --!strict
 --// Packages
 local Scenario = require(script.Parent.Scenario)
-local Component = require(script.Parent.Component)
-
 local AssertScenarioMatch = Scenario.AssertScenarioMatch
+
+local Component = require(script.Parent.Component)
 local AssertComponent = Component.AssertComponent
 
 local Types = require(script.Parent.Types)

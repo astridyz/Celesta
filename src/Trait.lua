@@ -24,7 +24,7 @@ function Trait.__call(self: Trait, entity, world, ...)
     return self:Apply(entity, world, ...)
 end
 
-local function NewTrait<Reqs...>(Query: Types.Query<Reqs...>, priority: number, initter: (entity: Entity, world: World, scope: Types.Scoped<unknown>, Reqs...) -> () ): Trait
+local function NewTrait<Reqs...>(Query: Types.Query<Reqs...>, priority: number, initter: (entity: Entity, world: World, Scoped<unknown>, Reqs...) -> () ): Trait
 
     return setmetatable({
 
@@ -46,7 +46,6 @@ function Trait.Apply(self: Trait, entity: Entity, world: World, ...: any)
 end
 
 function Trait.Remove(self: Trait, entity: Entity)
-    
     local scope = self._entityMap[entity._id]
     assert(scope, 'Trait error: attempt to remove a inexistent scope')
 
@@ -59,20 +58,17 @@ function Trait.isApplied(self: Trait, entity: Entity)
     return self._entityMap[entity._id] and true or false
 end
 
-local function AssertTrait(object, index: any)
+local function AssertTraitType(object, index: number)
     assert(typeof(object) == 'table', 'Trait #' .. index .. ' is invalid: not a table')
+end
+
+local function AssertTrait(object, index: number)
+    AssertTraitType(object, index)
     
     local meta = getmetatable(object)
     assert(meta, 'Trait #' .. index .. ' is invalid: doesnt have metatable.')
 
     assert(meta[TRAIT_MARKER], 'Trait #' .. index .. ' is invalid: has no marker.')
-
-    assert(object._query, 'Trait # ' .. index .. ' is invalid: has no query.')
-    
-    local priority = object._priority
-    assert(priority, 'Trait # ' .. index .. ' is invalid: has no priority.')
-
-    assert(typeof(priority) == 'number', 'Trait # ' .. index .. ' is invalid: Priority is not a number.')
 end
 
 return {
