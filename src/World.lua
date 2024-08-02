@@ -1,8 +1,11 @@
+--!strict
 --// Packages
+local Trait = require(script.Parent.Trait)
 local Component = require(script.Parent.Component)
 
 local AssertComponentData = Component.AssertComponentData
 local AssertComponent = Component.AssertComponent
+local AssertTrait = Trait.AssertTrait
 
 local Types = require(script.Parent.Types)
 type World = Types.World
@@ -14,6 +17,7 @@ type Component<D> = Types.Component<D>
 type ComponentData<D> = Types.ComponentData<D>
 
 type Dict<I, V> = Types.Dict<I, V>
+type Array<V> = Types.Array<V>
 
 local Entity = {}
 Entity.__index = Entity
@@ -23,13 +27,13 @@ local function NewEntity(world: World): Entity
     local nextId = world._nextId
     world._nextId += 1
 
-    return (setmetatable({
+    return setmetatable({
 
         _world = world,
         _storage = {},
         _id = nextId
 
-    }, Entity) :: any) :: Entity
+    }, Entity) :: any
 end
 
 function Entity.Add(self: Entity, ...: ComponentData<unknown>)
@@ -41,7 +45,7 @@ function Entity.Add(self: Entity, ...: ComponentData<unknown>)
         local metatable = getmetatable(data)
         local id = metatable._id
 
-        self._storage[id] = data
+        self._storage[id] = data :: ComponentData<unknown>
     end
 
     self._world:_applyTraits(self)
@@ -65,7 +69,7 @@ function Entity.Remove(self: Entity, ...: Component<unknown>)
 end
 
 function Entity.Get(self: Entity, ...: Component<unknown>)
-    local results = {}
+    local results = {} :: Types.Array<ComponentData<unknown> | boolean>
 
     for index, component in { ... } do
         
@@ -108,21 +112,23 @@ World.__index = World
 
 local function NewWorld(): World
 
-    return (setmetatable({
+    return setmetatable({
 
         _storage = {},
         _traits = {},
         _nextId = 1
 
-    }, World) :: any) :: World
+    }, World) :: any
 end
 
-function World._applyTraits(self: World, entity: Entity)
+function World._addColumnTrait(self: World, entity: Entity, column: Array<Trait>)
+    for _, trait in column do
+        
+        local query = trait._query
+        local storage = entity._storage
 
-    for query, trait in self._traits do
-    
-        if query:Match(entity._id, entity._storage) then
-            
+        if query:Match(entity._id, storage) then
+        
             if trait:isApplied(entity) then
                 continue
             end
@@ -137,17 +143,25 @@ function World._applyTraits(self: World, entity: Entity)
     end
 end
 
+function World._applyTraits(self: World, entity: Entity)
+    for priority, colunm in self._traits do
+        self:_addColumnTrait(entity, colunm)
+    end
+end
+
 function World.Import(self: World, ...: Trait)
-    for _, object in { ... } do
+    for index, object in { ... } do
         
-        assert(typeof(object) == 'table', 'Invalid trait type: not a table')
+        AssertTrait(object, index)
 
+        local priority = object._priority
         local traits = self._traits
-        local query = object._query
 
-        assert(query, 'Invalid trait type: Doesnt have a query')
+        if not traits[priority] then
+            traits[priority] = {}
+        end
 
-        traits[query] = object
+        table.insert(traits[priority], object)
     end
 end
 

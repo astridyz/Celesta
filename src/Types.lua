@@ -1,6 +1,7 @@
 --!strict
 export type Dict<I, V> = {[I]: V}
 export type Array<V> = {[number]: V}
+export type DeepArray<V> = {[unknown]: V | DeepArray<V>}
 
 type Dependency = State & {Update: (...any) -> ...any}
 
@@ -54,14 +55,18 @@ export type Component<D> = typeof(setmetatable(
     }
 ))
 
-export type ComponentData<D> = Scoped<D & {
-    _name: string,
-    _id: number,
+export type ComponentData<D> = Scoped<D & typeof(setmetatable(
+    {} :: {
+        _name: string,
+        _id: number,
 
-    Value: <data>(scope: Dict<unknown, unknown>, initialData: data?) -> Value<data>,
-    Computed: <data>(scope: Dict<unknown, unknown>, result: (use: <VD>(value: Value<VD>) -> VD) -> D) -> Computed<D>,
-    Clean: (scope: Dict<unknown, unknown>) -> (),
-}>
+        Value: <data>(scope: Dict<unknown, unknown>, initialData: data?) -> Value<data>,
+        Computed: <data>(scope: Dict<unknown, unknown>, result: (use: <VD>(value: Value<VD>) -> VD) -> D) -> Computed<D>,
+        Clean: (scope: Dict<unknown, unknown>) -> (),
+    }, {} :: {
+        _id: number
+    }
+))>
 
 export type ScenarioState = number | string
 
@@ -88,7 +93,7 @@ export type Query<Q...> = {
 
     No: (self: Query<Q...>, ...Component<unknown>) -> Query<Q...>,
     On: (self: Query<Q...>, ...ScenarioMatch) -> Query<Q...>,
-    Match: (self: Query<Q...>, entityID: number, storage: Dict<number, Component<unknown>>) -> boolean,
+    Match: (self: Query<Q...>, entityID: number, storage: Dict<number, ComponentData<unknown>>) -> boolean,
 
     --// This property doesnt really exist,
     --// it just holds the typepack
@@ -108,6 +113,7 @@ export type Trait = typeof(setmetatable(
         _entityMap: Dict<unknown, Scoped<unknown>>,
         _query: Query<unknown>,
         _initter: (...any) -> (),
+        _priority: number,
         
         Apply: (self: Trait, entity: Entity, world: World, ...ComponentData<unknown>) -> (),
         Remove: (self: Trait, entity: Entity) -> (),
@@ -138,13 +144,19 @@ export type EntityGet = (<D>(self: Entity, component: Component<D>) -> Component
 & (<D, D1, D2, D3, D4, D5>(self: Entity, component: Component<D>, component1: Component<D1>, component2: Component<D2>, component3: Component<D3>, component4: Component<D4>, component5: Component<D5>) -> (ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>, ComponentData<D5>))
 & (<D, D1, D2, D3, D4, D5, D6>(self: Entity, component: Component<D>, component1: Component<D1>, component2: Component<D2>, component3: Component<D3>, component4: Component<D4>, component5: Component<D5>, component6: Component<D6>) -> (ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>, ComponentData<D5>, ComponentData<D6>))
 
+export type traitParams = {
+    trait: Trait,
+    priority: number
+}
+
 export type World = {
     _storage: Dict<number, Entity>,
-    _traits: Dict<Query<unknown>, Trait>,
+    _traits: Dict<number, Array<Trait>>,
     _nextId: number,
+    _addColumnTrait: (self: World, entity: Entity, column: Array<Trait>) -> (),
     _applyTraits: (self: World, entity: Entity) -> (),
 
-    Import: (self: World, ...Trait) -> (),
+    Import: (self: World, ...Trait | traitParams) -> (),
     Entity: (self: World, ...ComponentData<unknown>) -> Entity,
     Get: (self: World, ID: number) -> Entity?,
     Despawn: (self: World, ID: number) -> (),

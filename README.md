@@ -21,7 +21,7 @@ local Character = Celesta.Component {
 
 local Query = Celesta.Query(Velocity, Character)
 
-local Trait = Celesta.Trait(Query, function(entity, world, scope, velocity, character)
+local Trait = Celesta.Trait(Query, 0, function(entity, world, scope, velocity, character)
 
     local current = velocity.current
 

@@ -55,7 +55,7 @@ function Query.On(self: Query<unknown>, ...: Types.ScenarioMatch)
     return self
 end
 
-function Query.Match(self: Query<unknown>, entityID: number, storage: Dict<number, Component<unknown>>)
+function Query.Match(self: Query<unknown>, entityID: number, storage: Dict<unknown, Component<unknown>>)
 
     for _, scenarioMatch in self._on do
         if not scenarioMatch(entityID) then

@@ -15,15 +15,13 @@ local function NewScenario(...: ScenarioState): Scenario
     local order = { ... }
     local states = InvertDict(order)
 
-    return (setmetatable({
+    return setmetatable({
 
         _tracking = {},
-
         _order = order,
-
         _states = states
 
-    }, Scenario) :: any) :: Scenario
+    }, Scenario) :: any
 end
 
 function Scenario.Patch(self: Scenario, entity: Entity, state: ScenarioState?)

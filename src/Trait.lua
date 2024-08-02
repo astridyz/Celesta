@@ -14,27 +14,26 @@ type ComponentData<D> = Types.ComponentData<D>
 
 type Scoped<D> = Types.Scoped<D>
 
+local TRAIT_MARKER = {}
+
 local Trait = {}
 Trait.__index = Trait
+Trait[TRAIT_MARKER] = true
 
 function Trait.__call(self: Trait, entity, world, ...)
     return self:Apply(entity, world, ...)
 end
 
-local function NewTrait<Reqs...>(
-    Query: Types.Query<Reqs...>,
-    initter: (entity: Entity, world: World, scope: Types.Scoped<unknown>, Reqs...) -> () 
-): Types.Trait
+local function NewTrait<Reqs...>(Query: Types.Query<Reqs...>, priority: number, initter: (entity: Entity, world: World, scope: Types.Scoped<unknown>, Reqs...) -> () ): Trait
 
-    local trait = {
+    return setmetatable({
+
         _query = Query :: any,
         _entityMap = {},
-        _initter = initter
-    }
+        _initter = initter,
+        _priority = priority
 
-    setmetatable(trait, Trait)
-
-    return trait :: any
+    }, Trait) :: any
 end
 
 function Trait.Apply(self: Trait, entity: Entity, world: World, ...: any)
@@ -47,11 +46,9 @@ function Trait.Apply(self: Trait, entity: Entity, world: World, ...: any)
 end
 
 function Trait.Remove(self: Trait, entity: Entity)
+    
     local scope = self._entityMap[entity._id]
-
-    if not scope then
-        error('Trait error: attempt to remove a inexistent scope')
-    end
+    assert(scope, 'Trait error: attempt to remove a inexistent scope')
 
     Clean(scope :: any)
 
@@ -62,4 +59,23 @@ function Trait.isApplied(self: Trait, entity: Entity)
     return self._entityMap[entity._id] and true or false
 end
 
-return NewTrait
+local function AssertTrait(object, index: any)
+    assert(typeof(object) == 'table', 'Trait #' .. index .. ' is invalid: not a table')
+    
+    local meta = getmetatable(object)
+    assert(meta, 'Trait #' .. index .. ' is invalid: doesnt have metatable.')
+
+    assert(meta[TRAIT_MARKER], 'Trait #' .. index .. ' is invalid: has no marker.')
+
+    assert(object._query, 'Trait # ' .. index .. ' is invalid: has no query.')
+    
+    local priority = object._priority
+    assert(priority, 'Trait # ' .. index .. ' is invalid: has no priority.')
+
+    assert(typeof(priority) == 'number', 'Trait # ' .. index .. ' is invalid: Priority is not a number.')
+end
+
+return {
+    New = NewTrait,
+    AssertTrait = AssertTrait
+}

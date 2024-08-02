@@ -18,7 +18,7 @@ export type Computed<D> = Types.Computed<D>
 
 return {
     World = require(script.World),
-    Trait = require(script.Trait),
+    Trait = require(script.Trait).New,
     Query = require(script.Query),
     Component = require(script.Component).New,
     Scenario = require(script.Scenario).New,
