@@ -1,6 +1,13 @@
 # Celesta
 A new theoretical pattern applied in a library.
 
+<div align="center">
+	<img src="Celesta.png" alt="Celesta" width="350" />
+	<br><br><br>
+	<p>A complete library for creating scalable games.</p>
+  <br><br><br>
+</div>
+
 ## Info
 Celesta applies *entities*, *traits* and *components* to create a world.
 
