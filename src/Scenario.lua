@@ -3,7 +3,7 @@
 local InvertDict = require(script.Parent.Utils.InvertDict)
 
 local Types = require(script.Parent.Types)
-type Scenario = Types.Scenario
+type Self = Types.Scenario
 type ScenarioState = Types.ScenarioState
 
 type Entity = Types.Entity
@@ -11,7 +11,7 @@ type Entity = Types.Entity
 local Scenario = {}
 Scenario.__index = Scenario
 
-local function NewScenario(...: ScenarioState): Scenario
+local function NewScenario(...: ScenarioState): Types.Scenario
     local order = { ... }
     local states = InvertDict(order)
 
@@ -24,7 +24,7 @@ local function NewScenario(...: ScenarioState): Scenario
     }, Scenario) :: any
 end
 
-function Scenario.Patch(self: Scenario, entity: Entity, state: ScenarioState?)
+function Scenario.Patch(self: Self, entity: Entity, state: ScenarioState?)
 
     local id = entity._id
 
@@ -40,7 +40,7 @@ function Scenario.Patch(self: Scenario, entity: Entity, state: ScenarioState?)
     end
 end
 
-function Scenario.Next(self: Scenario, entity: Entity)
+function Scenario.Next(self: Self, entity: Entity)
 
     local id = entity._id
 
@@ -63,33 +63,25 @@ function Scenario.Next(self: Scenario, entity: Entity)
     end
 end
 
-function Scenario.__call(self: Scenario, expectedState: ScenarioState, removePrevious: boolean?)
-
-    assert(self._states[expectedState], 'State not provided at default data.')
+function Scenario.Contain(self: Self, entity: Entity, state: ScenarioState?)
     
-    return function(entityID: number)
+    local id = entity._id
+    local entityState = self._tracking[id]
 
-        local state = self._tracking[entityID]
-
-        if not state then
-            return false
-        end
-
-        if removePrevious then
-            if state ~= expectedState then
-                return false
-            end
-        end
-
-        local expectedStateId = self._states[expectedState]
-        local actualStateId = self._states[state]
-
-        if actualStateId < expectedStateId then
-            return false
-        end
-
-        return true
+    if not entityState then
+        return false
     end
+
+    if state then
+        
+        if entityState == state then
+            return true
+        end
+
+        return false
+    end
+
+    return true
 end
 
 local function AssertScenarioMatch(object: unknown, index: number)

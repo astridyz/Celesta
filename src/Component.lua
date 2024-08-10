@@ -7,6 +7,7 @@ local Value = require(script.Parent.Reactive.Value)
 local Computed = require(script.Parent.Reactive.Computed)
 
 local Types = require(script.Parent.Types)
+type Self = Types.Component<unknown>
 
 local COMPONENT_MARKER = {}
 local ID = 0
@@ -17,51 +18,46 @@ local GlobalDataMethods = {
     Clean = Clean
 }
 
-local function Component<data>(default: data?): Types.Component<data>
+local Component = {}
+Component.__index = Component
+Component[COMPONENT_MARKER] = true
 
-    local name = debug.info(2, 's') :: string .. debug.info(2, 'l')
+function Component.__call(self: Self, mergeData)
+    return self.New(mergeData)
+end
 
-    assert(
-        default == nil or typeof(default) == 'table',
-        'Default data needs to be a table.'
+local function NewComponent<data>(default: data?): Types.Component<data>
+    
+    ID += 1
+
+    return setmetatable({
+
+        _id = ID,
+        _default = default
+
+    }, Component) :: any
+end
+
+function Component.New(self: Self, mergeData: Types.Merging)
+    
+    local data = Scoped(
+        GlobalDataMethods,
+        Component :: any
     )
 
-    ID += 1
-    local Component = {
-        _name = name,
-        _id  =  ID
-    }
+    mergeData = mergeData or {}
 
-    function Component.New(mergeData)
+    local default = self._default
 
-        local data = Scoped(
-            GlobalDataMethods,
-            Component
-        )
-
-        mergeData = mergeData or {}
-
-        if default then
-            JoinData(default, mergeData)
-        end
-
-        for index, value in mergeData do
-            data[index] = data:Value(value)
-        end
-
-        return data
+    if default then
+        JoinData(default, mergeData)
     end
 
-    local Meta = {}
-    
-    function Meta:__call(data)
-        return Component.New(data)
+    for index, value in mergeData do
+        data[index] = data:Value(value)
     end
 
-    Component[COMPONENT_MARKER] = true
-    setmetatable(Component, Meta)
-
-    return Component
+    return data
 end
 
 local function AssertType(object, index)
@@ -91,7 +87,7 @@ local function AssertComponentData(object, index)
 end
 
 return {
-    New = Component,
+    New = NewComponent,
     AssertComponent = AssertComponent,
     AssertComponentData = AssertComponentData
 }

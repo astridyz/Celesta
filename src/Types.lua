@@ -22,11 +22,19 @@ export type ScopedConstructor = (() -> Scoped<{}>)
 & (<A, B, C, D, E, F>(A & {}, B & {}, C & {}, D & {}, E & {}, F & {}) -> Scoped<A & B & C & D & E & F>)
 
 export type Value<D> = State & {
+    _current: any,
+
     Get: (self: Value<D>) -> D?,
     Set: (self: Value<D>, data: any, force: boolean?) -> (),
 }
 
+export type UseFunction<D> = (use: <VD>(value: Value<VD>) -> VD?) -> D
+
 export type Computed<D> = State & {
+    _scope: Scoped<any>,
+    _processor: UseFunction<unknown>,
+    _current: any,
+
     Get: (self: Computed<D>) -> D,
     Update: (self: Computed<D>) -> ()
 }
@@ -45,10 +53,10 @@ export type Merging = Dict<string, unknown>
 
 export type Component<D> = typeof(setmetatable(
     {} :: {
-        _name: string,
         _id: number,
+        _default: Merging?,
 
-        New: (data: Merging?) -> D,
+        New: (self: Component<D>, data: Merging?) -> D,
     },
     {} :: {
         __call: (self: Component<D>, data: Merging?) -> D
@@ -78,8 +86,9 @@ export type Scenario = typeof(setmetatable(
         _order: Array<ScenarioState>,
         _states: Dict<ScenarioState, number>,
         
-        Patch: (self: Scenario, entity: Entity) -> (),
-        Next: (self: Scenario, entity: Entity) -> ()
+        Patch: (self: Scenario, entity: Entity, state: ScenarioState?) -> (),
+        Next: (self: Scenario, entity: Entity) -> (),
+        Contain: (self: Scenario, entity: Entity, state: ScenarioState?) -> boolean
     },
     {} :: {
         __call: (self: Scenario, expectedState: ScenarioState, removePrevious: boolean?) -> ScenarioMatch
@@ -110,9 +119,9 @@ export type QueryConstructor = (<D>(component: Component<D>) -> Query<ComponentD
 
 export type Trait = typeof(setmetatable(
     {} :: {
-        _entityMap: Dict<unknown, Scoped<unknown>>,
+        _entityMap: Dict<number, Scoped<any>>,
         _query: Query<unknown>,
-        _initter: (...any) -> (),
+        _processor: (...any) -> (),
         _priority: number,
         
         Apply: (self: Trait, entity: Entity, world: World, ...ComponentData<unknown>) -> (),

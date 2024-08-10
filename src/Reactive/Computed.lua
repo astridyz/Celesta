@@ -3,39 +3,47 @@
 local Destruct = require(script.Parent.Destruct)
 
 local Types = require(script.Parent.Parent.Types)
+type Computed<D> = Types.Computed<D>
+type Self = Computed<unknown>
+
+type Value<D> = Types.Value<D>
+
 type Dict<I, V> = Types.Dict<I, V>
 
-local function Computed<D>(
-    scope: Dict<unknown, unknown>,
-    processor: (use: <VD>(value: Types.Value<VD>) -> VD?) -> D
-): Types.Computed<D>
+local Computed = {}
+Computed.__index = Computed
 
-    local Computed = {
-        _dependencySet = {},
-        Destruct = Destruct
-    }
-
-    local currentData = nil
+local function NewComputed<D>(scope: Dict<unknown, unknown>, processor: Types.UseFunction<D>): Computed<D>
     
-    local function Use<VD>(value: Types.Value<VD>)
-        value._dependencySet[Computed] = true
+    local self = (setmetatable({
 
-        return value:Get()
-    end
+        _scope = scope,
+        _processor = processor,
+        _current = nil,
+        Destruct = Destruct
 
-    function Computed:Get()
-        return currentData
-    end
+    }, Computed) :: any) :: Computed<D>
 
-    function Computed:Update()
-        currentData = processor(Use)
-    end
+    table.insert(scope :: {}, self.Destruct)
 
-    table.insert(scope :: {}, Computed.Destruct)
+    self:Update()
 
-    Computed:Update()
-
-    return Computed
+    return self
 end
 
-return Computed
+function Computed.Update(self: Self)
+    
+    local function Use<D>(value: Value<D>): D
+        value._dependencySet[self] = true
+
+        return value:Get() :: D
+    end
+
+    self._current = self._processor(Use)
+end
+
+function Computed.Get(self: Self)
+    return self._current
+end
+
+return NewComputed

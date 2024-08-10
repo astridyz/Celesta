@@ -24,34 +24,43 @@ function Trait.__call(self: Trait, entity, world, ...)
     return self:Apply(entity, world, ...)
 end
 
-local function NewTrait<Reqs...>(Query: Types.Query<Reqs...>, priority: number, initter: (entity: Entity, world: World, Scoped<unknown>, Reqs...) -> () ): Trait
+local function NewTrait<Reqs...>(Query: Types.Query<Reqs...>, priority: number, processor: (entity: Entity, world: World, Scoped<unknown>, Reqs...) -> () ): Trait
 
     return setmetatable({
 
         _query = Query :: any,
         _entityMap = {},
-        _initter = initter,
+        _processor = processor,
         _priority = priority
 
     }, Trait) :: any
 end
 
 function Trait.Apply(self: Trait, entity: Entity, world: World, ...: any)
-    local scope = Scoped()
 
-    self._entityMap[entity._id] = scope
+    local entityScope = Scoped()
+    local id = entity._id
 
-    local thread = task.spawn(self._initter, entity, world, scope, ...)
-    table.insert(scope, thread)
+    self._entityMap[id] = entityScope
+
+    local thread = task.spawn(
+        self._processor,
+        entity,
+        world,
+        entityScope,
+        ...
+    )
+
+    table.insert(entityScope, thread)
 end
 
 function Trait.Remove(self: Trait, entity: Entity)
-    local scope = self._entityMap[entity._id]
-    assert(scope, 'Trait error: attempt to remove a inexistent scope')
+    local id = entity._id
+    local scope = self._entityMap[id]
 
-    Clean(scope :: any)
+    Clean(scope)
 
-    self._entityMap[entity._id] = nil
+    self._entityMap[id] = nil
 end
 
 function Trait.isApplied(self: Trait, entity: Entity)

@@ -4,36 +4,41 @@ local Destruct = require(script.Parent.Destruct)
 local UpdateAll = require(script.Parent.UpdateAll)
 
 local Types = require(script.Parent.Parent.Types)
+type Value<D> = Types.Value<D>
+type Self = Value<unknown>
 type Dict<I, V> = Types.Dict<I, V>
 
-local function Value<data>(
-    scope: Dict<unknown, unknown>,
-    initialData: data?
-): Types.Value<data>
+local Value = {}
+Value.__index = Value
 
-    local Value = {
+local function NewValue<D>(scope: Dict<unknown, unknown>, initialData: D?): Value<D>
+
+    local self = (setmetatable({
+
+        _current = nil,
         _dependencySet = {},
         Destruct = Destruct
-    }
 
-    local currentData = initialData
+    }, Value) :: any) :: Value<D>
 
-    function Value:Get()
-        return currentData
-    end
+    table.insert(scope :: {}, self.Destruct)
 
-    function Value:Set(data: any, force: boolean?)
-        if data == currentData and not force then
-            return
-        end
-
-        currentData = data
-        UpdateAll(Value)
-    end
-
-    table.insert(scope :: {}, Value.Destruct)
-
-    return Value
+    return self
 end
 
-return Value
+function Value.Set(self: Self, data: any, force: boolean?)
+    local current = self._current
+
+    if data == current and not force then
+        return
+    end
+
+    self._current = data
+    UpdateAll(self)
+end
+
+function Value.Get(self: Self)
+    return self._current
+end
+
+return NewValue

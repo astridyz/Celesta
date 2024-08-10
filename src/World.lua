@@ -6,7 +6,7 @@ local AssertTrait = Trait.AssertTrait
 local Entity = require(script.Parent.Entity)
 
 local Types = require(script.Parent.Types)
-type World = Types.World
+type Self = Types.World
 type Entity = Types.Entity
 
 type Trait = Types.Trait
@@ -19,7 +19,7 @@ type Array<V> = Types.Array<V>
 local World = {}
 World.__index = World
 
-local function NewWorld(): World
+local function NewWorld(): Types.World
 
     return setmetatable({
 
@@ -30,7 +30,7 @@ local function NewWorld(): World
     }, World) :: any
 end
 
-function World._addColumnTrait(self: World, entity: Entity, column: Array<Trait>)
+function World._addColumnTrait(self: Self, entity: Entity, column: Array<Trait>)
     for _, trait in column do
         
         local query = trait._query
@@ -52,13 +52,13 @@ function World._addColumnTrait(self: World, entity: Entity, column: Array<Trait>
     end
 end
 
-function World._applyTraits(self: World, entity: Entity)
-    for priority, colunm in self._traits do
+function World._applyTraits(self: Self, entity: Entity)
+    for _, colunm in self._traits do
         self:_addColumnTrait(entity, colunm)
     end
 end
 
-function World.Import(self: World, ...: Trait)
+function World.Import(self: Self, ...: Trait)
     for index, object in { ... } do
         
         AssertTrait(object, index)
@@ -74,7 +74,7 @@ function World.Import(self: World, ...: Trait)
     end
 end
 
-function World.Entity(self: World, ...: ComponentData<unknown>)
+function World.Entity(self: Self, ...: ComponentData<unknown>)
     local entity = Entity(self)
     self._storage[entity._id] = entity
 
@@ -83,7 +83,7 @@ function World.Entity(self: World, ...: ComponentData<unknown>)
     return entity
 end
 
-function World.Get(self: World, ID: number)
+function World.Get(self: Self, ID: number)
     local entity = self._storage[ID]
 
     if not entity then
@@ -93,7 +93,7 @@ function World.Get(self: World, ID: number)
     return entity
 end
 
-function World.Despawn(self: World, ID: number)
+function World.Despawn(self: Self, ID: number)
     local entity = self:Get(ID)
 
     if not entity then

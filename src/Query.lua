@@ -8,6 +8,7 @@ local AssertComponent = Component.AssertComponent
 
 local Types = require(script.Parent.Types)
 type Query<Q...> = Types.Query<Q...>
+type Self = Query<unknown>
 
 type Component<D> = Types.Component<D>
 type ComponentData<D> = Types.ComponentData<D>
@@ -36,7 +37,7 @@ local function NewQuery(...)
     }, Query)
 end
 
-function Query.No(self: Query<unknown>, ...: Component<unknown>)
+function Query.No(self: Self, ...: Component<unknown>)
     checkAndSolve({ ... })
 
     self._no = { ... }
@@ -44,7 +45,7 @@ function Query.No(self: Query<unknown>, ...: Component<unknown>)
     return self
 end
 
-function Query.On(self: Query<unknown>, ...: Types.ScenarioMatch)
+function Query.On(self: Self, ...: Types.ScenarioMatch)
     
     for index, ScenarioMatch in { ... } do
         AssertScenarioMatch(ScenarioMatch, index)
@@ -55,7 +56,7 @@ function Query.On(self: Query<unknown>, ...: Types.ScenarioMatch)
     return self
 end
 
-function Query.Match(self: Query<unknown>, entityID: number, storage: Dict<unknown, Component<unknown>>)
+function Query.Match(self: Self, entityID: number, storage: Dict<unknown, Component<unknown>>)
 
     for _, scenarioMatch in self._on do
         if not scenarioMatch(entityID) then
