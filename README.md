@@ -1,10 +1,7 @@
-# Celesta
-A new theoretical pattern applied in a library.
-
 <div align="center">
 	<img src="Celesta.png" alt="Celesta" width="350" />
 	<br><br><br>
-	<p>A complete library for creating scalable games.</p>
+	<p>A new theoretical pattern applied in a library for Roblox.</p>
   <br><br><br>
 </div>
 
