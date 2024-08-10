@@ -15,7 +15,7 @@ local function NewValue<D>(scope: Dict<unknown, unknown>, initialData: D?): Valu
 
     local self = (setmetatable({
 
-        _current = nil,
+        _current = initialData,
         _dependencySet = {},
         Destruct = Destruct
 

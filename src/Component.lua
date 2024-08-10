@@ -7,7 +7,8 @@ local Value = require(script.Parent.Reactive.Value)
 local Computed = require(script.Parent.Reactive.Computed)
 
 local Types = require(script.Parent.Types)
-type Self = Types.Component<unknown>
+type Component<D> = Types.Component<D>
+type Self = Component<unknown>
 
 local COMPONENT_MARKER = {}
 local ID = 0
@@ -20,29 +21,31 @@ local GlobalDataMethods = {
 
 local Component = {}
 Component.__index = Component
-Component[COMPONENT_MARKER] = true
 
 function Component.__call(self: Self, mergeData)
-    return self.New(mergeData)
+    return self:New(mergeData)
 end
 
-local function NewComponent<data>(default: data?): Types.Component<data>
+local function NewComponent<D>(default: D?): Component<D>
     
     ID += 1
 
-    return setmetatable({
+    local self = (setmetatable({
 
         _id = ID,
         _default = default
 
-    }, Component) :: any
+    }, Component) :: any) :: Component<D>
+
+    self[COMPONENT_MARKER] = true
+    return self
 end
 
 function Component.New(self: Self, mergeData: Types.Merging)
     
     local data = Scoped(
         GlobalDataMethods,
-        Component :: any
+        self :: any
     )
 
     mergeData = mergeData or {}
@@ -70,7 +73,6 @@ local function AssertComponent(object, index)
     assert(object[COMPONENT_MARKER],
         'Component #' .. index .. ' is invalid: has no marker. Possible Component Instance passed instead'
     )
-
 end
 
 local function AssertComponentData(object, index)
