@@ -1,7 +1,8 @@
 --!strict
---// Packages
+--// Typing
 local Types = require(script.Parent.Parent.Types)
 
+--// This
 local function UpdateAll(target: Types.State)
 
     for dependent in target._dependencySet do

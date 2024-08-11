@@ -1,3 +1,4 @@
+--// This
 local function joinData<config, target>(config: config, target: target): config & target
 
     assert(type(target) == 'table', 'Target needs to be a table.')

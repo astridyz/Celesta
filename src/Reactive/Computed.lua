@@ -2,6 +2,7 @@
 --// Packages
 local Destruct = require(script.Parent.Destruct)
 
+--// Typing
 local Types = require(script.Parent.Parent.Types)
 type Computed<D> = Types.Computed<D>
 type Self = Computed<unknown>
@@ -10,9 +11,11 @@ type Value<D> = Types.Value<D>
 
 type Dict<I, V> = Types.Dict<I, V>
 
+--// This
 local Computed = {}
 Computed.__index = Computed
 
+--// Functions
 local function NewComputed<D>(scope: Dict<unknown, unknown>, processor: Types.UseFunction<D>): Computed<D>
     
     local self = (setmetatable({

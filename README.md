@@ -1,65 +1,8 @@
 <div align="center">
-	<img src="Celesta.png" alt="Celesta" width="350" />
+    <br>
+	<img src="Celesta.svg" alt="Celesta" width="350" />
 	<br><br><br>
-	<p>A new theoretical pattern applied in a library for Roblox.</p>
+	<p><p>A new theoretical pattern applied in a library for Roblox. ✨</p></p>
+	<a href="https://astridyz.github.io/Celesta/"><strong>View documentation \(￣︶￣*\)</strong></a>
   <br><br><br>
 </div>
-
-## Info
-Celesta applies *entities*, *traits* and *components* to create a world.
-
-## Usage
-Creating components and scheduling traits
-
-```lua
-local World = Celesta.World()
-
---// Default data for components
-local Velocity = Celesta.Component {
-    current = 16
-}
-
-local Character = Celesta.Component {
-    model = 'none'
-}
-
-local Query = Celesta.Query(Velocity, Character)
-
-local Trait = Celesta.Trait(Query, 0, function(entity, world, scope, velocity, character)
-
-    local current = velocity.current
-
-    local char = character.model:Get()
-    local humanoid = char.Humanoid
-
-    --// Everytime "current" changes, the computed
-    --// will change the humanoid walkspeed to the current's value
-    Celesta.Computed(scope, function(use)
-        humanoid.WalkSpeed = use(current)
-    end)
-end)
-
-
-World:Import(Trait)
-```
-
-Spawn entities with sets of components
-
-```lua
-local function setupPlayer(player)
-
-    World:Entity(
-        Player(),
-        Velocity(),
-        Instance {
-            roblox = player
-        },
-        Character {
-            model = player.Character
-        }
-    )
-
-end
-
-game.Players.PlayerAdded:Connect(setupPlayer)
-```

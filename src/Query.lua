@@ -6,6 +6,7 @@ local AssertScenarioMatch = Scenario.AssertScenarioMatch
 local Component = require(script.Parent.Component)
 local AssertComponent = Component.AssertComponent
 
+--// Tping
 local Types = require(script.Parent.Types)
 type Query<Q...> = Types.Query<Q...>
 type Self = Query<unknown>
@@ -15,18 +16,20 @@ type ComponentData<D> = Types.ComponentData<D>
 
 type Dict<I, V> = Types.Dict<I, V>
 
-local function checkAndSolve(object)
-    for index, component in object do
+--// This
+local Query  = {}
+Query.__index = Query
+
+--// Functions
+local function checkAndSolve(...)
+    for index, component in { ... } do
         AssertComponent(component, index)
     end
 end
 
-local Query  = {}
-Query.__index = Query
-
 local function NewQuery(...)
     
-    checkAndSolve({ ... })
+    checkAndSolve(...)
 
     return setmetatable({
 
@@ -38,7 +41,7 @@ local function NewQuery(...)
 end
 
 function Query.No(self: Self, ...: Component<unknown>)
-    checkAndSolve({ ... })
+    checkAndSolve(...)
 
     self._no = { ... }
 

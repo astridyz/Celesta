@@ -4,6 +4,7 @@ local Component = require(script.Parent.Component)
 local AssertComponentData = Component.AssertComponentData
 local AssertComponent = Component.AssertComponent
 
+--// Typing
 local Types = require(script.Parent.Types)
 type Self = Types.Entity
 type World = Types.World
@@ -11,9 +12,11 @@ type World = Types.World
 type Component<D> = Types.Component<D>
 type ComponentData<D> = Types.ComponentData<D>
 
+--// This
 local Entity = {}
 Entity.__index = Entity
 
+--// Functions
 local function NewEntity(world: World): Types.Entity
     
     local nextId = world._nextId

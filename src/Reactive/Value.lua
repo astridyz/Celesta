@@ -3,14 +3,18 @@
 local Destruct = require(script.Parent.Destruct)
 local UpdateAll = require(script.Parent.UpdateAll)
 
+--// Typing
 local Types = require(script.Parent.Parent.Types)
 type Value<D> = Types.Value<D>
 type Self = Value<unknown>
+
 type Dict<I, V> = Types.Dict<I, V>
 
+--// This
 local Value = {}
 Value.__index = Value
 
+--// Functions
 local function NewValue<D>(scope: Dict<unknown, unknown>, initialData: D?): Value<D>
 
     local self = (setmetatable({

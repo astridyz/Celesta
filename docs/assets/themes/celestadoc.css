@@ -1,0 +1,33 @@
+:root {
+	--celestadoc-grey-1: #101814;
+	--celestadoc-grey-2: #808080;
+	--celestadoc-grey-3: #f2f2f2;
+	--celestadoc-grey-4: #dce4da;
+
+	--celestadoc-grey-1-a80: rgba(74, 74, 74, 0.8);
+	--celestadoc-grey-2-a80: rgba(102, 102, 102, 0.8);
+
+	--celestadoc-primary: #8CCB9A;
+	--celestadoc-primary-1: #c7ffd0;
+	--celestadoc-primary-2: #8dbe99;
+
+	--celestadoc-accent: hsl(240, 5%, 60%);
+	--celestadoc-accent-p1: hsl(240, 5%, 70%);
+	--celestadoc-accent-p2: hsl(240, 5%, 80%);
+	--celestadoc-accent-n1: hsl(240, 5%, 40%);
+	--celestadoc-accent-n2: hsl(240, 5%, 20%);
+}
+
+[data-md-color-scheme="celestadoc-dark"] {
+	--celestadoc-bg-1: var(--celestadoc-grey-1);
+	--celestadoc-bg-1-a80: var(--celestadoc-grey-1-a80);
+	--celestadoc-bg-2: var(--celestadoc-grey-2);
+	--celestadoc-bg-3: var(--celestadoc-grey-2);
+
+	--celestadoc-fg-1: var(--celestadoc-grey-4);
+	--celestadoc-fg-2: var(--celestadoc-grey-3);
+	--celestadoc-fg-3: var(--celestadoc-grey-3);
+
+	--celestadoc-stroke: hsla(240, 5%, 100%, 15%);
+	--celestadoc-smoke: var(--celestadoc-grey-1-a80);
+}

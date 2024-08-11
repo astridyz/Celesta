@@ -6,26 +6,28 @@ local Scoped = require(script.Parent.Reactive.Scoped)
 local Value = require(script.Parent.Reactive.Value)
 local Computed = require(script.Parent.Reactive.Computed)
 
+--// Typing
 local Types = require(script.Parent.Types)
 type Component<D> = Types.Component<D>
 type Self = Component<unknown>
 
-local COMPONENT_MARKER = {}
-local ID = 0
+type Merging = Types.Merging
 
-local GlobalDataMethods = {
+--// Constants
+local ID = 0
+local COMPONENT_MARKER = {}
+
+local GLOBAL_METHODS = {
     Value = Value,
     Computed = Computed,
     Clean = Clean
 }
 
+--// This
 local Component = {}
 Component.__index = Component
 
-function Component.__call(self: Self, mergeData)
-    return self:New(mergeData)
-end
-
+--// Functions
 local function NewComponent<D>(default: D?): Component<D>
     
     ID += 1
@@ -41,10 +43,10 @@ local function NewComponent<D>(default: D?): Component<D>
     return self
 end
 
-function Component.New(self: Self, mergeData: Types.Merging)
+function Component.New(self: Self, mergeData: Merging)
     
     local data = Scoped(
-        GlobalDataMethods,
+        GLOBAL_METHODS,
         self :: any
     )
 
@@ -61,6 +63,10 @@ function Component.New(self: Self, mergeData: Types.Merging)
     end
 
     return data
+end
+
+function Component.__call(self: Self, mergeData: Merging)
+    return self:New(mergeData)
 end
 
 local function AssertType(object, index)

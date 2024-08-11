@@ -4,26 +4,26 @@ local Clean = require(script.Parent.Reactive.Clean)
 
 local Scoped = require(script.Parent.Reactive.Scoped)
 
+--// Typing
 local Types = require(script.Parent.Types)
 type Entity = Types.Entity
 type World = Types.World
 
 type Trait = Types.Trait
-
 type ComponentData<D> = Types.ComponentData<D>
 
 type Scoped<D> = Types.Scoped<D>
 
+--// Constants
 local TRAIT_MARKER = {}
 
+--// This
 local Trait = {}
 Trait.__index = Trait
+
 Trait[TRAIT_MARKER] = true
 
-function Trait.__call(self: Trait, entity, world, ...)
-    return self:Apply(entity, world, ...)
-end
-
+--// Functions
 local function NewTrait<Reqs...>(Query: Types.Query<Reqs...>, priority: number, processor: (entity: Entity, world: World, Scoped<unknown>, Reqs...) -> () ): Trait
 
     return setmetatable({
@@ -36,7 +36,7 @@ local function NewTrait<Reqs...>(Query: Types.Query<Reqs...>, priority: number, 
     }, Trait) :: any
 end
 
-function Trait.Apply(self: Trait, entity: Entity, world: World, ...: any)
+function Trait.Apply(self: Trait, entity: Entity, world: World, ...: ComponentData<unknown>)
 
     local entityScope = Scoped()
     local id = entity._id
@@ -65,6 +65,10 @@ end
 
 function Trait.isApplied(self: Trait, entity: Entity)
     return self._entityMap[entity._id] and true or false
+end
+
+function Trait.__call(self: Trait, entity: Entity, world: World, ...: ComponentData<unknown>)
+    return self:Apply(entity, world, ...)
 end
 
 local function AssertTraitType(object, index: number)

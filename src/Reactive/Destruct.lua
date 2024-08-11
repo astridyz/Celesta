@@ -1,7 +1,8 @@
 --!strict
---// Packages
+--// Typing
 local Types = require(script.Parent.Parent.Types)
 
+--// This
 local function Destruct(object: Types.State)
     for dependency in object._dependencySet do
         

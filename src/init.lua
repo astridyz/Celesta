@@ -1,4 +1,5 @@
---// Packages
+--!strict
+--// Typing
 local Types = require(script.Types)
 
 export type World = Types.World
@@ -16,6 +17,7 @@ export type Value<D> = Types.Value<D>
 export type Scoped<D> = Types.Scoped<D>
 export type Computed<D> = Types.Computed<D>
 
+--// Init
 return {
     World = require(script.World),
     Trait = require(script.Trait).New,

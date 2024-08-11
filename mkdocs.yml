@@ -1,0 +1,38 @@
+site_name: Celesta
+site_url: https://astridyz.github.io/Celesta/
+
+repo_name: astridyz/Celesta
+repo_url: https://github.com/astridyz/Celesta
+
+theme:
+  name: material
+
+  palette:
+    #- media: "(prefers-color-scheme: light)"
+    #  scheme: celestadoc-light
+    #  toggle:
+    #    icon: material/brightness-7 
+    #    name: Switch to dark mode
+
+    #- media: "(prefers-color-scheme: dark)"
+      scheme: celestadoc-dark
+    #  toggle:
+    #    icon: material/brightness-4
+    #    name: Switch to light mode
+
+  features:
+    - navigation.tabs
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - toc.integrate
+    - navigation.expand
+
+  font:
+    text: Plus Jakarta Sans
+    code: JetBrains Mono
+
+extra_css:
+  - assets/themes/celestadoc.css
+  - assets/themes/colors.css
+  - assets/themes/page.css

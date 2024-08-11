@@ -2,15 +2,18 @@
 --// Packages
 local InvertDict = require(script.Parent.Utils.InvertDict)
 
+--// Typing
 local Types = require(script.Parent.Types)
 type Self = Types.Scenario
 type ScenarioState = Types.ScenarioState
 
 type Entity = Types.Entity
 
+--// This
 local Scenario = {}
 Scenario.__index = Scenario
 
+--// Functions
 local function NewScenario(...: ScenarioState): Types.Scenario
     local order = { ... }
     local states = InvertDict(order)

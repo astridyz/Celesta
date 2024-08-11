@@ -5,20 +5,22 @@ local AssertTrait = Trait.AssertTrait
 
 local Entity = require(script.Parent.Entity)
 
+--// Typing
 local Types = require(script.Parent.Types)
 type Self = Types.World
 type Entity = Types.Entity
 
 type Trait = Types.Trait
-
 type ComponentData<D> = Types.ComponentData<D>
 
 type Dict<I, V> = Types.Dict<I, V>
 type Array<V> = Types.Array<V>
 
+--// This
 local World = {}
 World.__index = World
 
+--// Functions
 local function NewWorld(): Types.World
 
     return setmetatable({
