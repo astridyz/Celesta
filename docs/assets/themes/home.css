@@ -1,0 +1,27 @@
+.hero {
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.hero-content {
+    max-width: 700px;
+    margin: auto;
+}
+
+.hero .logo {
+    max-width: 250px;
+    margin-bottom: 20px;
+}
+
+.btn-primary {  
+    background-color: var(--celestadoc-grey-3);
+    color: var(--celestadoc-grey-1) !important;
+    padding: 10px 20px;
+    border-radius: 0.4em;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--md-admonition-fg-color);
+}

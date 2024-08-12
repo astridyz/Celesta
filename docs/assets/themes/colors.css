@@ -3,9 +3,7 @@
     --md-default-fg-color--light:        var(--celestadoc-fg-1);
     --md-default-bg-color:               var(--celestadoc-bg-1);
 
-
-    --md-primary-fg-color:               var(--celestadoc-primary-fg-color);
-
+    --md-primary-fg-color: var(--celestadoc-primary-fg-color);
     --md-primary-bg-color: var(--celestadoc-primary-bg-color)
 
     --md-accent-fg-color:                var(--celestadoc-accent);

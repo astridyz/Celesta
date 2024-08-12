@@ -36,3 +36,4 @@ extra_css:
   - assets/themes/celestadoc.css
   - assets/themes/colors.css
   - assets/themes/page.css
+  - assets/themes/home.css
