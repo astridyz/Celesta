@@ -1,6 +1,11 @@
 .md-header {
     padding: 0.5rem;
     margin-bottom: -0.1rem;
-    box-shadow: 0 0 0.35rem 0.5rem var(--fusiondoc-bg-1) !important;
+    box-shadow: 0 0 0.35rem 0.5rem var(--celestadoc-bg-1) !important;
     background-color: var(--celestadoc-bg-1);
+}
+
+.md-sidebar .md-nav__link--active {
+    border-left: 4px solid var(--md-default-fg-color);
+    padding-left: 16px;
 }

@@ -1,17 +1,18 @@
 * {
     --md-default-fg-color:               var(--celestadoc-fg-1);
     --md-default-fg-color--light:        var(--celestadoc-fg-1);
+    --md-default-fg-color--lighter:        var(--celestadoc-fg-1);
     --md-default-bg-color:               var(--celestadoc-bg-1);
 
-    --md-primary-fg-color: var(--celestadoc-primary-fg-color);
-    --md-primary-bg-color: var(--celestadoc-primary-bg-color)
+    --md-primary-fg-color:               var(--celestadoc-primary-fg-color);
+    --md-primary-bg-color:               var(--celestadoc-primary-bg-color);
 
-    --md-accent-fg-color:                var(--celestadoc-accent);
-    --md-accent-fg-color--transparent:   var(--celestadoc-accent-a10);
+    --md-accent-fg-color:                var(--celestadoc-accent-hover);
 
-    --md-typeset-color:                var(--md-default-fg-color);
-	--md-typeset-a-color:              var(--md-default-fg-color);
-	--md-typeset-mark-color:           var(--celestadoc-primary);
+    --md-typeset-color:                  var(--md-default-fg-color);
+    --md-typeset-a-color:                var(--celestadoc-fg-1);
+    --md-typeset-a-color--hover:         var(--celestadoc-accent-hover);
+    --md-typeset-mark-color:             var(--celestadoc-primary);
 
     --md-admonition-fg-color:            var(--celestadoc-fg-1);
     --md-admonition-bg-color:            var(--celestadoc-bg-2);
@@ -21,4 +22,9 @@
     --md-footer-fg-color--lighter:       var(--celestadoc-fg-2);
     --md-footer-bg-color:                var(--celestadoc-bg-1);
     --md-footer-bg-color--dark:          var(--celestadoc-bg-1);
+
+    --md-nav-fg-color:                   var(--celestadoc-fg-1);
+    --md-nav-accent-fg-color:            var(--celestadoc-accent-hover);
+    --md-nav-fg-color--active:           var(--celestadoc-primary-fg-color);
+    --md-nav-item-icon-color:            var(--celestadoc-primary-fg-color);
 }
