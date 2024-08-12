@@ -9,7 +9,7 @@
 
 	--celestadoc-primary: #8CCB9A;
 	--celestadoc-primary-1: #c7ffd0;
-	--celestadoc-primary-2: #8dbe99;
+	--celestadoc-primary-2: #467a53;
 
 	--celestadoc-accent: hsl(240, 5%, 60%);
 	--celestadoc-accent-p1: hsl(240, 5%, 70%);
@@ -24,10 +24,10 @@
 	--celestadoc-bg-2: var(--celestadoc-grey-2);
 	--celestadoc-bg-3: var(--celestadoc-grey-2);
 
+	--celestadoc-primary-fg-color: var(--celestadoc-grey-1);
+	--celestadoc-accent-hover: var(--celestadoc-primary-1);
+
 	--celestadoc-fg-1: var(--celestadoc-grey-4);
 	--celestadoc-fg-2: var(--celestadoc-grey-3);
 	--celestadoc-fg-3: var(--celestadoc-grey-3);
-
-	--celestadoc-stroke: hsla(240, 5%, 100%, 15%);
-	--celestadoc-smoke: var(--celestadoc-grey-1-a80);
 }
