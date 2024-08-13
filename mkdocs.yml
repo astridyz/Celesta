@@ -6,6 +6,7 @@ repo_url: https://github.com/astridyz/Celesta
 
 theme:
   name: material
+  custom_dir: docs/assets/overrides
 
   palette:
     #- media: "(prefers-color-scheme: light)"
@@ -24,7 +25,11 @@ theme:
     - navigation.tabs
     - navigation.top
     - navigation.tracking
+    - navigation.sections
+    - navigation.instant
+    - navigation.indexes
     - search.highlight
+    - search.suggest
     - toc.integrate
     - navigation.expand
 
@@ -37,3 +42,10 @@ extra_css:
   - assets/themes/colors.css
   - assets/themes/page.css
   - assets/themes/home.css
+
+nav:
+  - Home: index.md
+  - Learning:
+    - Get Started: Learning/index.md
+    - Downloading: Learning/Downloading.md
+    - Contributing: Learning/Contributing.md

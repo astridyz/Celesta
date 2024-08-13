@@ -9,3 +9,45 @@
     border-left: 4px solid var(--md-default-fg-color);
     padding-left: 16px;
 }
+
+.md-footer {
+    padding: 20px 0;
+}
+
+.md-footer__inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.md-footer__link {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.md-footer__link:hover {
+    color: var(--celestadoc-primary-1);
+}
+
+.md-footer__direction {
+    display: block;
+    font-size: 12px;
+    color: var(--celestadoc-primary-1);
+    margin-bottom: 4px;
+}
+
+.md-footer-meta {
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+.md-footer-meta__inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
