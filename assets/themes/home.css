@@ -25,3 +25,8 @@
 .btn-primary:hover {
     background-color: var(--md-admonition-fg-color);
 }
+
+.md-content {
+    max-width: 40rem;
+    margin: 0 auto;
+}
