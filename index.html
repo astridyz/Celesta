@@ -54,6 +54,8 @@
     
       <link rel="stylesheet" href="assets/themes/home.css">
     
+      <link rel="stylesheet" href="assets/themes/code.css">
+    
     <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -510,47 +512,44 @@
 <h2 id="components">Components</h2>
 <p>Components in Celesta are defined simply and intuitively.
   They are used to store data related to an entity. Here is an example of how to define components for health and regeneration:</p>
-<pre><code>type Value&lt;D&gt; = Celesta.Value&lt;D&gt;
+<div class="highlight"><pre><span></span><code><span class="nb">type</span> <span class="n">Value</span><span class="o">&lt;</span><span class="n">D</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">Celesta</span><span class="p">.</span><span class="n">Value</span><span class="o">&lt;</span><span class="n">D</span><span class="o">&gt;</span>
 
-local Health = Celesta.Component {
-    max = 100 :: Value&lt;number&gt;,
-    current = 100 :: Value&lt;number&gt;
-}
+<span class="kd">local</span> <span class="n">Health</span> <span class="o">=</span> <span class="n">Celesta</span><span class="p">.</span><span class="n">Component</span> <span class="p">{</span>
+    <span class="n">max</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="p">}</span>
 
-local Regeneration = Celesta.Component {
-    duration = 5 :: Value&lt;number&gt;,
-    amount = 10 :: Value&lt;number&gt;
-}
-</code></pre>
+<span class="kd">local</span> <span class="n">Regeneration</span> <span class="o">=</span> <span class="n">Celesta</span><span class="p">.</span><span class="n">Component</span> <span class="p">{</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">amount</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="p">}</span>
+</code></pre></div>
 <h2 id="query">Query</h2>
 <p>The Query object is used to combine components that need to be considered in a system. It defines which components are required for a trait to function. Here is an example of defining a query between Health and Regeneration:</p>
-<pre><code>local Query = Celesta.Query(Health, Regeneration)
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span> <span class="n">Query</span> <span class="o">=</span> <span class="n">Celesta</span><span class="p">.</span><span class="n">Query</span><span class="p">(</span><span class="n">Health</span><span class="p">,</span> <span class="n">Regeneration</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="traits">Traits</h2>
 <p>Traits are functions that are executed when entities meet the requirements defined by the Query. They allow you to add custom logic and respond to changes in component states. Here’s an example of a trait that regenerates an entity’s health:</p>
-<pre><code>local Trait = Celesta.Trait(Query, function(world, entity, scope, health, regeneration)
+<div class="highlight"><pre><span></span><code><span class="kd">local</span> <span class="n">Trait</span> <span class="o">=</span> <span class="n">Celesta</span><span class="p">.</span><span class="n">Trait</span><span class="p">(</span><span class="n">Query</span><span class="p">,</span> <span class="kr">function</span><span class="p">(</span><span class="n">world</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="n">health</span><span class="p">,</span> <span class="n">regeneration</span><span class="p">)</span>
 
-    local regenerating = task.spawn(function()
+    <span class="kd">local</span> <span class="n">regenerating</span> <span class="o">=</span> <span class="n">task</span><span class="p">.</span><span class="n">spawn</span><span class="p">(</span><span class="kr">function</span><span class="p">()</span>
 
-        local endTime = os.clock() + regeneration.duration:Get()
+        <span class="kd">local</span> <span class="n">endTime</span> <span class="o">=</span> <span class="nb">os.clock</span><span class="p">()</span> <span class="o">+</span> <span class="n">regeneration</span><span class="p">.</span><span class="n">duration</span><span class="p">:</span><span class="n">Get</span><span class="p">()</span>
 
-        while os.clock() &lt; endTime do
-            task.wait(1)
+        <span class="kr">while</span> <span class="nb">os.clock</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">endTime</span> <span class="kr">do</span>
+            <span class="n">task</span><span class="p">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-            local current = health.current:Get()
-            local max = health.max:Get()
+            <span class="kd">local</span> <span class="n">current</span> <span class="o">=</span> <span class="n">health</span><span class="p">.</span><span class="n">current</span><span class="p">:</span><span class="n">Get</span><span class="p">()</span>
+            <span class="kd">local</span> <span class="n">max</span> <span class="o">=</span> <span class="n">health</span><span class="p">.</span><span class="n">max</span><span class="p">:</span><span class="n">Get</span><span class="p">()</span>
 
-            --// Add logic for health regeneration here
+            <span class="c1">--// Add logic for health regeneration here </span>
+        <span class="kr">end</span>
+    <span class="kr">end</span><span class="p">)</span>
 
-        end
-
-    end)
-
-    --// Will be canceled when the trait is removed
-    table.insert(scope, regenerating)
-
-end)
-</code></pre>
+    <span class="c1">--// Will be canceled when the trait is removed</span>
+    <span class="nb">table.insert</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">regenerating</span><span class="p">)</span>
+<span class="kr">end</span><span class="p">)</span>
+</code></pre></div>
 
 
 
