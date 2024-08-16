@@ -20,17 +20,17 @@ Celesta is a library for Entity Component System (ECS) that adopts an event-driv
 Components in Celesta are defined simply and intuitively.
   They are used to store data related to an entity. Here is an example of how to define components for health and regeneration:
 
-```
+```Lua
 type Value<D> = Celesta.Value<D>
 
 local Health = Celesta.Component {
-    max = 100 :: Value<number>,
-    current = 100 :: Value<number>
+    max = 100,
+    current = 100
 }
 
 local Regeneration = Celesta.Component {
-    duration = 5 :: Value<number>,
-    amount = 10 :: Value<number>
+    duration = 5,
+    amount = 10
 }
 ```
 
@@ -38,18 +38,18 @@ local Regeneration = Celesta.Component {
 
 The Query object is used to combine components that need to be considered in a system. It defines which components are required for a trait to function. Here is an example of defining a query between Health and Regeneration:
 
-```
+```Lua
 local Query = Celesta.Query(Health, Regeneration)
 ```
 
 ## Traits
 Traits are functions that are executed when entities meet the requirements defined by the Query. They allow you to add custom logic and respond to changes in component states. Here’s an example of a trait that regenerates an entity’s health:
 
-```
+```Lua
 local Trait = Celesta.Trait(Query, function(world, entity, scope, health, regeneration)
 
     local regenerating = task.spawn(function()
-    
+
         local endTime = os.clock() + regeneration.duration:Get()
 
         while os.clock() < endTime do
@@ -58,14 +58,11 @@ local Trait = Celesta.Trait(Query, function(world, entity, scope, health, regene
             local current = health.current:Get()
             local max = health.max:Get()
             
-            --// Add logic for health regeneration here
-            
+            --// Add logic for health regeneration here 
         end
-
     end)
 
     --// Will be canceled when the trait is removed
     table.insert(scope, regenerating)
-
 end)
 ```

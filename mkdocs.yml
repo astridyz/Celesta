@@ -45,6 +45,7 @@ extra_css:
   - assets/themes/colors.css
   - assets/themes/page.css
   - assets/themes/home.css
+  - assets/themes/code.css
 
 nav:
   - Home: index.md
@@ -52,3 +53,6 @@ nav:
     - Get Started: Learning/index.md
     - Downloading: Learning/Downloading.md
     - Contributing: Learning/Contributing.md
+
+markdown_extensions:
+  - pymdownx.superfences
