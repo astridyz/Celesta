@@ -23,7 +23,7 @@ local function Clean(object: Types.Cleaning)
             object:destroy()
         
         elseif object.Destruct then
-            object.Destruct()
+            object:Destruct()
 
         else
 

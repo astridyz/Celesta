@@ -6,10 +6,11 @@ local Scoped = require(script.Parent.Reactive.Scoped)
 
 --// Typing
 local Types = require(script.Parent.Types)
+type Trait = Types.Trait
+type Self = Trait
+
 type Entity = Types.Entity
 type World = Types.World
-
-type Trait = Types.Trait
 type ComponentData<D> = Types.ComponentData<D>
 
 type Scoped<D> = Types.Scoped<D>
@@ -36,7 +37,7 @@ local function NewTrait<Reqs...>(Query: Types.Query<Reqs...>, priority: number, 
     }, Trait) :: any
 end
 
-function Trait.Apply(self: Trait, entity: Entity, world: World, ...: ComponentData<unknown>)
+function Trait.Apply(self: Self, entity: Entity, world: World, ...: ComponentData<unknown>)
 
     local entityScope = Scoped()
     local id = entity._id
@@ -54,7 +55,7 @@ function Trait.Apply(self: Trait, entity: Entity, world: World, ...: ComponentDa
     table.insert(entityScope, thread)
 end
 
-function Trait.Remove(self: Trait, entity: Entity)
+function Trait.Remove(self: Self, entity: Entity)
     local id = entity._id
     local scope = self._entityMap[id]
 
@@ -63,11 +64,11 @@ function Trait.Remove(self: Trait, entity: Entity)
     self._entityMap[id] = nil
 end
 
-function Trait.isApplied(self: Trait, entity: Entity)
+function Trait.isApplied(self: Self, entity: Entity)
     return self._entityMap[entity._id] and true or false
 end
 
-function Trait.__call(self: Trait, entity: Entity, world: World, ...: ComponentData<unknown>)
+function Trait.__call(self: Self, entity: Entity, world: World, ...: ComponentData<unknown>)
     return self:Apply(entity, world, ...)
 end
 

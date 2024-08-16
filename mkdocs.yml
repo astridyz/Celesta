@@ -8,6 +8,9 @@ theme:
   name: material
   custom_dir: docs/assets/overrides
 
+  logo: assets/images/Celesta.svg
+  favicon: assets/images/Ce.svg
+
   palette:
     #- media: "(prefers-color-scheme: light)"
     #  scheme: celestadoc-light
