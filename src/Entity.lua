@@ -101,6 +101,8 @@ end
 function Entity.Destruct(self: Self)
     self:Clear()
 
+    self._world._storage[self._id] = nil
+
     table.clear(self)
 end
 

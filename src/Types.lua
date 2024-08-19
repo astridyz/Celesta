@@ -158,11 +158,19 @@ export type traitParams = {
     priority: number
 }
 
+export type TraitColumn = Dict<Trait, boolean>
+
 export type World = {
     _storage: Dict<number, Entity>,
-    _traits: Dict<number, Array<Trait>>,
+    _traits: Dict<number, TraitColumn>,
     _nextId: number,
-    _addColumnTrait: (self: World, entity: Entity, column: Array<Trait>) -> (),
+    _componentsMap: Dict<number, Array<Trait>>,
+
+    _indexTraitsByComponents: (self: World, column: TraitColumn) -> (),
+    _generateComponentsIndex: (self: World) -> (),
+    _getRelevantTraits: (self: World, entity: Entity) -> TraitColumn,
+    _filterTraitsFromColumn: (self: World, storageSet: TraitColumn, column: TraitColumn) -> Array<Trait>,
+    _attachTraitColumn: (self: World, entity: Entity, column: TraitColumn) -> (),
     _applyTraits: (self: World, entity: Entity) -> (),
 
     Import: (self: World, ...Trait | traitParams) -> (),

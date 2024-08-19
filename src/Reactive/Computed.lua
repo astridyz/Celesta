@@ -20,7 +20,6 @@ local function NewComputed<D>(scope: Dict<unknown, unknown>, processor: Types.Us
     
     local self = (setmetatable({
 
-        _scope = scope,
         _processor = processor,
         _current = nil,
         Destruct = Destruct

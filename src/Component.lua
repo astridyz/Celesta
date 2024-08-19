@@ -28,14 +28,15 @@ local Component = {}
 Component.__index = Component
 
 --// Functions
-local function NewComponent<D>(default: D?): Component<D>
+local function NewComponent<D>(name: string?, default: D?): Component<D>
     
     ID += 1
 
     local self = (setmetatable({
 
         _id = ID,
-        _default = default
+        _default = default,
+        _name = name or tostring(ID)
 
     }, Component) :: any) :: Component<D>
 

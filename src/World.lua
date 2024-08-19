@@ -11,6 +11,7 @@ type Self = Types.World
 type Entity = Types.Entity
 
 type Trait = Types.Trait
+type TraitColumn = Types.TraitColumn
 type ComponentData<D> = Types.ComponentData<D>
 
 type Dict<I, V> = Types.Dict<I, V>
@@ -27,19 +28,79 @@ local function NewWorld(): Types.World
 
         _storage = {},
         _traits = {},
-        _nextId = 1
+        _componentsMap = {},
+        _nextId = 1,
 
     }, World) :: any
 end
 
-function World._addColumnTrait(self: Self, entity: Entity, column: Array<Trait>)
-    for _, trait in column do
+function World._indexTraitsByComponents(self: Self, column: TraitColumn)
+    local componentsMap = self._componentsMap
+
+    for trait in pairs(column) do
+
+        for _, component in ipairs(trait._query._need) do
+
+            local id = component._id
+
+            if not componentsMap[id] then
+                componentsMap[id] = {}
+            end
+
+            table.insert(componentsMap[id], trait)
+        end
+    end
+end
+
+function World._generateComponentsIndex(self: Self)
+    for _, column in pairs(self._traits) do
+        self:_indexTraitsByComponents(column)
+    end
+end
+
+function World._getRelevantTraits(self: Self, entity: Entity): TraitColumn
+    local relevantComponents = {}
+
+    for id, component in entity._storage do
+        
+        local componentTraits = self._componentsMap[id]
+        assert(componentTraits, 'Invalid storage: Unfinished map.')
+
+        for _, trait in ipairs(componentTraits) do
+            relevantComponents[trait] = true
+        end
+    end
+
+    return relevantComponents
+end
+
+function World._filterTraitsFromColumn(self: Self, storageSet: TraitColumn, column: TraitColumn): Array<Trait>
+    local filtered = {}
+
+    for trait in pairs(column) do
+
+        if not storageSet[trait] then
+            continue
+        end
+
+        table.insert(filtered, trait)
+    end
+
+    return filtered
+end
+
+function World._attachTraitColumn(self: Self, entity: Entity, column: TraitColumn)
+    
+    local relevantTraits = self:_getRelevantTraits(entity)
+    local filterColumn = self:_filterTraitsFromColumn(relevantTraits, column)
+
+    for _, trait in ipairs(filterColumn) do
         
         local query = trait._query
         local storage = entity._storage
 
         if query:Match(entity._id, storage) then
-        
+    
             if trait:isApplied(entity) then
                 continue
             end
@@ -54,9 +115,9 @@ function World._addColumnTrait(self: Self, entity: Entity, column: Array<Trait>)
     end
 end
 
-function World._applyTraits(self: Self, entity: Entity)
-    for _, colunm in self._traits do
-        self:_addColumnTrait(entity, colunm)
+function World._applyTraits(self: Self, entity: Entity, column: TraitColumn)
+    for _, column in pairs(self._traits) do
+        self:_attachTraitColumn(entity, column)
     end
 end
 
@@ -72,8 +133,10 @@ function World.Import(self: Self, ...: Trait)
             traits[priority] = {}
         end
 
-        table.insert(traits[priority], object)
+        traits[priority][object] = true
     end
+
+    self:_generateComponentsIndex()
 end
 
 function World.Entity(self: Self, ...: ComponentData<unknown>)
