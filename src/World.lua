@@ -35,32 +35,6 @@ local function NewWorld(): World
     }, World) :: any
 end
 
-local function getRelevantTraits(
-    world: World,
-    entity: Entity,
-    modified: Array<number>,
-    column: Dict<Trait, boolean>
-): Array<Trait>
-
-    local relevant = {}
-
-    for _, id in ipairs(modified) do
-        
-        local componentTraits = world._componentsMap[id]
-
-        for _, trait in ipairs(componentTraits) do
-
-            if not column[trait] then
-                continue
-            end
-
-            table.insert(relevant, trait)
-        end
-    end
-
-    return relevant
-end
-
 local function attachTraitColumn(
     world: World,
     entity: Entity,
@@ -89,16 +63,52 @@ local function attachTraitColumn(
 
 end
 
+local function getRelevantTraits(
+    world: World,
+    entity: Entity,
+    modified: Array<number>
+): Array<Trait>
+
+    local relevant = {}
+
+    for _, id in ipairs(modified) do
+        
+        local componentTraits = world._componentsMap[id]
+
+        for _, trait in ipairs(componentTraits) do
+            table.insert(relevant, trait)
+        end
+    end
+
+    return relevant
+end
+
+local function filterColumnTraits(column: Dict<Trait, boolean>, traits: Array<Trait>): Array<Trait>
+    local filtered = {}
+    
+    for _, trait in ipairs(traits) do
+        if not column[trait] then
+            continue
+        end
+
+        table.insert(filtered, trait)
+    end
+
+    return filtered
+end
+
 function World._applyTraits(
     self: Self,
     entity: Entity,
     modified: Array<number>
 )
 
-    for _, column in pairs(self._traitMap) do
-        local relevant = getRelevantTraits(self, entity, modified, column)
+    local relevant = getRelevantTraits(self, entity, modified)
 
-        attachTraitColumn(self, entity, relevant)
+    for _, column in pairs(self._traitMap) do
+        
+        local columnFilter = filterColumnTraits(column, relevant)
+        attachTraitColumn(self, entity, columnFilter)
     end
 end
 
