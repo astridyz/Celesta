@@ -32,6 +32,7 @@ local function NewEntity(world: World): Types.Entity
 end
 
 function Entity.Add(self: Self, ...: ComponentData<unknown>)
+    local modified = {}
 
     for index, data in { ... } do
 
@@ -41,12 +42,15 @@ function Entity.Add(self: Self, ...: ComponentData<unknown>)
         local id = metatable._id
 
         self._storage[id] = data :: ComponentData<unknown>
+
+        table.insert(modified, id)
     end
 
-    self._world:_applyTraits(self)
+    self._world:_applyTraits(self, modified)
 end
 
 function Entity.Remove(self: Self, ...: Component<unknown>)
+    local modified = {}
 
     for index, component in { ... } do
         
@@ -58,9 +62,11 @@ function Entity.Remove(self: Self, ...: Component<unknown>)
         datatype:Clean()
 
         self._storage[id] = nil
+
+        table.insert(modified, id)
     end
 
-    self._world:_applyTraits(self)
+    self._world:_applyTraits(self, modified)
 end
 
 function Entity.Get(self: Self, ...: Component<unknown>)
@@ -86,16 +92,19 @@ function Entity.Get(self: Self, ...: Component<unknown>)
 end
 
 function Entity.Clear(self: Self)
+    local modified = {}
 
-    for index, data in self._storage do
+    for id, data in self._storage do
         
-        AssertComponentData(data, index)
+        AssertComponentData(data, id)
         data:Clean()
+
+        table.insert(modified, id)
     end 
 
     table.clear(self._storage)
 
-    self._world:_applyTraits(self)
+    self._world:_applyTraits(self, modified)
 end
 
 function Entity.Destruct(self: Self)

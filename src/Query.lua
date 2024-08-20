@@ -1,8 +1,5 @@
 --!strict
 --// Packages
-local Scenario = require(script.Parent.Scenario)
-local AssertScenarioMatch = Scenario.AssertScenarioMatch
-
 local Component = require(script.Parent.Component)
 local AssertComponent = Component.AssertComponent
 
@@ -48,24 +45,11 @@ function Query.No(self: Self, ...: Component<unknown>)
     return self
 end
 
-function Query.On(self: Self, ...: Types.ScenarioMatch)
-    
-    for index, ScenarioMatch in { ... } do
-        AssertScenarioMatch(ScenarioMatch, index)
-    end
-
-    self._on = { ... }
-
-    return self
-end
-
-function Query.Match(self: Self, entityID: number, storage: Dict<unknown, Component<unknown>>)
-
-    for _, scenarioMatch in self._on do
-        if not scenarioMatch(entityID) then
-            return false
-        end
-    end
+function Query.Match(
+    self: Self,
+    entityID: number,
+    storage: Dict<unknown, Component<unknown>>
+)
 
     for _, component in self._need do
         local id = component._id

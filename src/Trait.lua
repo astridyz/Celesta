@@ -25,7 +25,11 @@ Trait.__index = Trait
 Trait[TRAIT_MARKER] = true
 
 --// Functions
-local function NewTrait<Reqs...>(Query: Types.Query<Reqs...>, priority: number, processor: (entity: Entity, world: World, Scoped<unknown>, Reqs...) -> () ): Trait
+local function NewTrait<Reqs...>(
+    Query: Types.Query<Reqs...>,
+    priority: number,
+    processor: (entity: Entity, world: World, Scoped<unknown>, Reqs...) -> () 
+): Trait
 
     return setmetatable({
 
@@ -37,7 +41,12 @@ local function NewTrait<Reqs...>(Query: Types.Query<Reqs...>, priority: number, 
     }, Trait) :: any
 end
 
-function Trait.Apply(self: Self, entity: Entity, world: World, ...: ComponentData<unknown>)
+function Trait.Apply(
+    self: Self,
+    entity: Entity,
+    world: World,
+    ...: ComponentData<unknown>
+)
 
     local entityScope = Scoped()
     local id = entity._id
@@ -66,10 +75,6 @@ end
 
 function Trait.isApplied(self: Self, entity: Entity)
     return self._entityMap[entity._id] and true or false
-end
-
-function Trait.__call(self: Self, entity: Entity, world: World, ...: ComponentData<unknown>)
-    return self:Apply(entity, world, ...)
 end
 
 local function AssertTraitType(object, index: number)

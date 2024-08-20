@@ -7,11 +7,12 @@ local Entity = require(script.Parent.Entity)
 
 --// Typing
 local Types = require(script.Parent.Types)
-type Self = Types.World
+type World = Types.World
+type Self = World
+
 type Entity = Types.Entity
 
 type Trait = Types.Trait
-type TraitColumn = Types.TraitColumn
 type ComponentData<D> = Types.ComponentData<D>
 
 type Dict<I, V> = Types.Dict<I, V>
@@ -22,47 +23,30 @@ local World = {}
 World.__index = World
 
 --// Functions
-local function NewWorld(): Types.World
+local function NewWorld(): World
 
     return setmetatable({
 
         _storage = {},
-        _traits = {},
         _componentsMap = {},
+        _traitMap = {},
         _nextId = 1,
 
     }, World) :: any
 end
 
-function World._indexTraitsByComponents(self: Self, column: TraitColumn)
-    local componentsMap = self._componentsMap
+local function getRelevantTraits(
+    world: World,
+    entity: Entity,
+    modified: Array<number>,
+    column: Dict<Trait, boolean>
+): Array<Trait>
 
-    for trait in pairs(column) do
-        for _, component in ipairs(trait._query._need) do
+    local relevant = {}
 
-            local id = component._id
-
-            if not componentsMap[id] then
-                componentsMap[id] = {}
-            end
-
-            table.insert(componentsMap[id], trait)
-        end
-    end
-end
-
-function World._generateComponentsIndex(self: Self)
-    for _, column in pairs(self._traits) do
-        self:_indexTraitsByComponents(column)
-    end
-end
-
-function World._getRelevantTraits(self: Self, entity: Entity, column: TraitColumn): TraitColumn
-    local relevantComponents = {}
-
-    for id, component in entity._storage do
+    for _, id in ipairs(modified) do
         
-        local componentTraits = self._componentsMap[id]
+        local componentTraits = world._componentsMap[id]
 
         for _, trait in ipairs(componentTraits) do
 
@@ -70,19 +54,21 @@ function World._getRelevantTraits(self: Self, entity: Entity, column: TraitColum
                 continue
             end
 
-            relevantComponents[trait] = true
+            table.insert(relevant, trait)
         end
     end
 
-    return relevantComponents
+    return relevant
 end
 
-function World._attachTraitColumn(self: Self, entity: Entity, column: TraitColumn)
-    
-    local relevantTraits = self:_getRelevantTraits(entity, column)
+local function attachTraitColumn(
+    world: World,
+    entity: Entity,
+    traits: Array<Trait>
+)
 
-    for trait in pairs(relevantTraits) do
-        
+    for _, trait in ipairs(traits) do
+
         local query = trait._query
         local storage = entity._storage
 
@@ -92,7 +78,7 @@ function World._attachTraitColumn(self: Self, entity: Entity, column: TraitColum
                 continue
             end
 
-            trait(entity, self, entity:Get(table.unpack(query._need)))
+            trait:Apply(entity, world, entity:Get(table.unpack(query._need)))
             continue
         end
 
@@ -100,30 +86,53 @@ function World._attachTraitColumn(self: Self, entity: Entity, column: TraitColum
             trait:Remove(entity)
         end
     end
+
 end
 
-function World._applyTraits(self: Self, entity: Entity, column: TraitColumn)
-    for _, column in pairs(self._traits) do
-        self:_attachTraitColumn(entity, column)
+function World._applyTraits(
+    self: Self,
+    entity: Entity,
+    modified: Array<number>
+)
+
+    for _, column in pairs(self._traitMap) do
+        local relevant = getRelevantTraits(self, entity, modified, column)
+
+        attachTraitColumn(self, entity, relevant)
+    end
+end
+
+local function IndexComponentsByTrait(world: World, trait: Trait)
+    local componentsMap = world._componentsMap
+
+    for _, component in ipairs(trait._query._need) do
+    
+        local id = component._id
+
+        if not componentsMap[id] then
+            componentsMap[id] = {}
+        end
+
+        table.insert(componentsMap[id], trait)
     end
 end
 
 function World.Import(self: Self, ...: Trait)
-    for index, object in { ... } do
+    for index, trait in { ... } do
         
-        AssertTrait(object, index)
+        AssertTrait(trait, index)
 
-        local priority = object._priority
-        local traits = self._traits
+        local priority = trait._priority
+        local traits = self._traitMap
 
         if not traits[priority] then
             traits[priority] = {}
         end
 
-        traits[priority][object] = true
-    end
+        traits[priority][trait] = true
 
-    self:_generateComponentsIndex()
+        IndexComponentsByTrait(self, trait)
+    end
 end
 
 function World.Entity(self: Self, ...: ComponentData<unknown>)
