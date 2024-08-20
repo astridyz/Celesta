@@ -168,8 +168,7 @@ export type World = {
 
     _indexTraitsByComponents: (self: World, column: TraitColumn) -> (),
     _generateComponentsIndex: (self: World) -> (),
-    _getRelevantTraits: (self: World, entity: Entity) -> TraitColumn,
-    _filterTraitsFromColumn: (self: World, storageSet: TraitColumn, column: TraitColumn) -> Array<Trait>,
+    _getRelevantTraits: (self: World, entity: Entity, column: TraitColumn) -> TraitColumn,
     _attachTraitColumn: (self: World, entity: Entity, column: TraitColumn) -> (),
     _applyTraits: (self: World, entity: Entity) -> (),
 

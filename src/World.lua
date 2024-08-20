@@ -38,7 +38,6 @@ function World._indexTraitsByComponents(self: Self, column: TraitColumn)
     local componentsMap = self._componentsMap
 
     for trait in pairs(column) do
-
         for _, component in ipairs(trait._query._need) do
 
             local id = component._id
@@ -58,15 +57,19 @@ function World._generateComponentsIndex(self: Self)
     end
 end
 
-function World._getRelevantTraits(self: Self, entity: Entity): TraitColumn
+function World._getRelevantTraits(self: Self, entity: Entity, column: TraitColumn): TraitColumn
     local relevantComponents = {}
 
     for id, component in entity._storage do
         
         local componentTraits = self._componentsMap[id]
-        assert(componentTraits, 'Invalid storage: Unfinished map.')
 
         for _, trait in ipairs(componentTraits) do
+
+            if not column[trait] then
+                continue
+            end
+
             relevantComponents[trait] = true
         end
     end
@@ -74,27 +77,11 @@ function World._getRelevantTraits(self: Self, entity: Entity): TraitColumn
     return relevantComponents
 end
 
-function World._filterTraitsFromColumn(self: Self, storageSet: TraitColumn, column: TraitColumn): Array<Trait>
-    local filtered = {}
-
-    for trait in pairs(column) do
-
-        if not storageSet[trait] then
-            continue
-        end
-
-        table.insert(filtered, trait)
-    end
-
-    return filtered
-end
-
 function World._attachTraitColumn(self: Self, entity: Entity, column: TraitColumn)
     
-    local relevantTraits = self:_getRelevantTraits(entity)
-    local filterColumn = self:_filterTraitsFromColumn(relevantTraits, column)
+    local relevantTraits = self:_getRelevantTraits(entity, column)
 
-    for _, trait in ipairs(filterColumn) do
+    for trait in pairs(relevantTraits) do
         
         local query = trait._query
         local storage = entity._storage
