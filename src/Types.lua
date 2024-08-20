@@ -76,32 +76,11 @@ export type ComponentData<D> = Scoped<D & typeof(setmetatable(
     }
 ))>
 
-export type ScenarioState = number | string
-
-export type ScenarioMatch = (entityID: number) -> boolean
-
-export type Scenario = typeof(setmetatable(
-    {} :: {
-        _tracking: Dict<number, ScenarioState>,
-        _order: Array<ScenarioState>,
-        _states: Dict<ScenarioState, number>,
-        
-        Patch: (self: Scenario, entity: Entity, state: ScenarioState?) -> (),
-        Next: (self: Scenario, entity: Entity) -> (),
-        Contain: (self: Scenario, entity: Entity, state: ScenarioState?) -> boolean
-    },
-    {} :: {
-        __call: (self: Scenario, expectedState: ScenarioState, removePrevious: boolean?) -> ScenarioMatch
-    }
-))
-
 export type Query<Q...> = {
     _no: Array<Component<unknown>>,
-    _on: Array<ScenarioMatch>,
     _need: Array<Component<unknown>>,
 
     No: (self: Query<Q...>, ...Component<unknown>) -> Query<Q...>,
-    On: (self: Query<Q...>, ...ScenarioMatch) -> Query<Q...>,
     Match: (self: Query<Q...>, entityID: number, storage: Dict<number, ComponentData<unknown>>) -> boolean,
 
     --// This property doesnt really exist,
@@ -117,21 +96,16 @@ export type QueryConstructor = (<D>(component: Component<D>) -> Query<ComponentD
 & (<D, D1, D2, D3, D4, D5>(component: Component<D>, component2: Component<D1>, component3: Component<D2>, component4: Component<D3>, component5: Component<D4>, component6: Component<D5>) -> Query<ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>, ComponentData<D5>>)
 & (<D, D1, D2, D3, D4, D5, D6>(component: Component<D>, component2: Component<D1>, component3: Component<D2>, component4: Component<D3>, component5: Component<D4>, component6: Component<D5>, component7: Component<D6>) -> Query<ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>, ComponentData<D5>, ComponentData<D6>>)
 
-export type Trait = typeof(setmetatable(
-    {} :: {
-        _entityMap: Dict<number, Scoped<any>>,
-        _query: Query<unknown>,
-        _processor: (...any) -> (),
-        _priority: number,
-        
-        Apply: (self: Trait, entity: Entity, world: World, ...ComponentData<unknown>) -> (),
-        Remove: (self: Trait, entity: Entity) -> (),
-        isApplied: (self: Trait, entity: Entity) -> boolean
-    },
-    {} :: {
-        __call: (self: Trait, entity: Entity, world: World, ...ComponentData<unknown>) -> ()
-    }
-))
+export type Trait = typeof(setmetatable({}, {})) & {
+    _entityMap: Dict<number, Scoped<any>>,
+    _query: Query<unknown>,
+    _processor: (...any) -> (),
+    _priority: number,
+    
+    Apply: (self: Trait, entity: Entity, world: World, ...ComponentData<unknown>) -> (),
+    Remove: (self: Trait, entity: Entity) -> (),
+    isApplied: (self: Trait, entity: Entity) -> boolean
+}
 
 export type Entity = {
     _id: number,
@@ -153,26 +127,16 @@ export type EntityGet = (<D>(self: Entity, component: Component<D>) -> Component
 & (<D, D1, D2, D3, D4, D5>(self: Entity, component: Component<D>, component1: Component<D1>, component2: Component<D2>, component3: Component<D3>, component4: Component<D4>, component5: Component<D5>) -> (ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>, ComponentData<D5>))
 & (<D, D1, D2, D3, D4, D5, D6>(self: Entity, component: Component<D>, component1: Component<D1>, component2: Component<D2>, component3: Component<D3>, component4: Component<D4>, component5: Component<D5>, component6: Component<D6>) -> (ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>, ComponentData<D5>, ComponentData<D6>))
 
-export type traitParams = {
-    trait: Trait,
-    priority: number
-}
-
-export type TraitColumn = Dict<Trait, boolean>
-
 export type World = {
-    _storage: Dict<number, Entity>,
-    _traits: Dict<number, TraitColumn>,
+
     _nextId: number,
+    _storage: Dict<number, Entity>,
     _componentsMap: Dict<number, Array<Trait>>,
+    _traitMap: Dict<number, Dict<Trait, boolean>>,
 
-    _indexTraitsByComponents: (self: World, column: TraitColumn) -> (),
-    _generateComponentsIndex: (self: World) -> (),
-    _getRelevantTraits: (self: World, entity: Entity, column: TraitColumn) -> TraitColumn,
-    _attachTraitColumn: (self: World, entity: Entity, column: TraitColumn) -> (),
-    _applyTraits: (self: World, entity: Entity) -> (),
+    _applyTraits: (self: World, entity: Entity, modified: Array<number>) -> (),
 
-    Import: (self: World, ...Trait | traitParams) -> (),
+    Import: (self: World, ...Trait) -> (),
     Entity: (self: World, ...ComponentData<unknown>) -> Entity,
     Get: (self: World, ID: number) -> Entity?,
     Despawn: (self: World, ID: number) -> (),
