@@ -1,11 +1,9 @@
 --!strict
---// Packages
 local Trait = require(script.Parent.Trait)
 local AssertTrait = Trait.AssertTrait
 
 local Entity = require(script.Parent.Entity)
 
---// Typing
 local Types = require(script.Parent.Types)
 type World = Types.World
 type Self = World
@@ -15,14 +13,9 @@ type Entity = Types.Entity
 type Trait = Types.Trait
 type ComponentData<D> = Types.ComponentData<D>
 
-type Dict<I, V> = Types.Dict<I, V>
-type Array<V> = Types.Array<V>
-
---// This
 local World = {}
 World.__index = World
 
---// Functions
 local function NewWorld(): World
 
     return setmetatable({
@@ -35,39 +28,11 @@ local function NewWorld(): World
     }, World) :: any
 end
 
-local function attachTraitColumn(
-    world: World,
-    entity: Entity,
-    traits: Array<Trait>
-)
-
-    for _, trait in ipairs(traits) do
-
-        local query = trait._query
-        local storage = entity._storage
-
-        if query:Match(entity._id, storage) then
-    
-            if trait:isApplied(entity) then
-                continue
-            end
-
-            trait:Apply(entity, world, entity:Get(table.unpack(query._need)))
-            continue
-        end
-
-        if trait:isApplied(entity) then
-            trait:Remove(entity)
-        end
-    end
-
-end
-
 local function getRelevantTraits(
     world: World,
     entity: Entity,
-    modified: Array<number>
-): Array<Trait>
+    modified: { number }
+): { Trait }
 
     local relevant = {}
 
@@ -83,7 +48,10 @@ local function getRelevantTraits(
     return relevant
 end
 
-local function filterColumnTraits(column: Dict<Trait, boolean>, traits: Array<Trait>): Array<Trait>
+local function filterColumnTraits(
+    column: {[Trait]: boolean},
+    traits: { Trait }
+): { Trait }
     local filtered = {}
     
     for _, trait in ipairs(traits) do
@@ -97,18 +65,45 @@ local function filterColumnTraits(column: Dict<Trait, boolean>, traits: Array<Tr
     return filtered
 end
 
+local function attachTraitColumn(
+    world: World,
+    entity: Entity,
+    column: {[Trait]: boolean},
+    traits: { Trait }
+)
+
+    local columnFilter = filterColumnTraits(column, traits)
+
+    for _, trait in ipairs(columnFilter) do
+
+        local query = trait._query
+        local storage = entity._storage
+
+        if query:Match(entity._id, storage) then
+    
+            if trait:isApplied(entity) then
+                continue
+            end
+
+            trait:Apply(entity, world, entity:Get(table.unpack(query._need)))
+    
+        elseif trait:isApplied(entity) then
+            trait:Remove(entity)
+
+        end
+    end
+end
+
 function World._applyTraits(
     self: Self,
     entity: Entity,
-    modified: Array<number>
+    modified: { number }
 )
 
     local relevant = getRelevantTraits(self, entity, modified)
 
     for _, column in pairs(self._traitMap) do
-        
-        local columnFilter = filterColumnTraits(column, relevant)
-        attachTraitColumn(self, entity, columnFilter)
+        attachTraitColumn(self, entity, column, relevant)
     end
 end
 
@@ -145,7 +140,7 @@ function World.Import(self: Self, ...: Trait)
     end
 end
 
-function World.Entity(self: Self, ...: ComponentData<unknown>)
+function World.Entity(self: Self, ...: ComponentData<unknown>): Entity
     local entity = Entity(self)
     self._storage[entity._id] = entity
 
@@ -154,7 +149,7 @@ function World.Entity(self: Self, ...: ComponentData<unknown>)
     return entity
 end
 
-function World.Get(self: Self, ID: number)
+function World.Get(self: Self, ID: number): Entity?
     local entity = self._storage[ID]
 
     if not entity then

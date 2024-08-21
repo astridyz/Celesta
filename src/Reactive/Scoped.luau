@@ -1,13 +1,10 @@
 --!strict
---// Packages
 local JoinData = require(script.Parent.Parent.Utils.JoinData)
 
---// Typing
 local Types = require(script.Parent.Parent.Types)
 type Scoped<D> = Types.Scoped<D>
 
---// This
-local function Scope(...: Types.Dict<unknown, unknown>)
+local function Scope(...: {[unknown]: unknown})
     
     local proxy = {}
     proxy.__index = proxy

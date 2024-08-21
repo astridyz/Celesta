@@ -1,4 +1,3 @@
---// Packages
 local Clean = require(script.Parent.Reactive.Clean)
 local JoinData = require(script.Parent.Utils.JoinData)
 
@@ -6,14 +5,11 @@ local Scoped = require(script.Parent.Reactive.Scoped)
 local Value = require(script.Parent.Reactive.Value)
 local Computed = require(script.Parent.Reactive.Computed)
 
---// Typing
 local Types = require(script.Parent.Types)
-type Component<D> = Types.Component<D>
-type Self = Component<unknown>
+type Self<default> = Types.Component<default>
 
 type Merging = Types.Merging
 
---// Constants
 local ID = 0
 local COMPONENT_MARKER = {}
 
@@ -23,28 +19,31 @@ local GLOBAL_METHODS = {
     Clean = Clean
 }
 
---// This
 local Component = {}
 Component.__index = Component
 
---// Functions
-local function NewComponent<D>(name: string?, default: D?): Component<D>
+local function NewComponent<default>(
+    name: string?,
+    default: default?
+): Types.Component<default>
     
     ID += 1
 
-    local self = (setmetatable({
+    return setmetatable({
 
         _id = ID,
         _default = default,
-        _name = name or tostring(ID)
+        _name = name or tostring(ID),
 
-    }, Component) :: any) :: Component<D>
+        [COMPONENT_MARKER] = true
 
-    self[COMPONENT_MARKER] = true
-    return self
+    }, Component) :: any
 end
 
-function Component.New(self: Self, mergeData: Merging)
+function Component.New<default>(
+    self: Self<default>,
+    mergeData: Merging
+): default
     
     local data = Scoped(
         GLOBAL_METHODS,
@@ -66,7 +65,7 @@ function Component.New(self: Self, mergeData: Merging)
     return data
 end
 
-function Component.__call(self: Self, mergeData: Merging)
+function Component.__call<default>(self: Self<default>, mergeData: Merging): default
     return self:New(mergeData)
 end
 

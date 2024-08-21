@@ -1,8 +1,8 @@
---// This
+--!strict
 local function joinData<config, target>(config: config, target: target): config & target
 
-    assert(type(target) == 'table', 'Target needs to be a table.')
-    assert(type(config) == 'table', 'Config needs to be a table.')
+    assert(type(target) == 'table', 'Target must be a table.')
+    assert(type(config) == 'table', 'Config  must be a table.')
 
     for index, default in pairs(config) do
 

@@ -1,8 +1,6 @@
 --!strict
---// Typing
 local Types = require(script.Parent.Parent.Types)
 
---// This
 local function Clean(object: Types.Cleaning)
 
     if typeof(object) == 'function' then

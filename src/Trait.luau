@@ -1,10 +1,8 @@
 --!strict
---// Packages
 local Clean = require(script.Parent.Reactive.Clean)
 
 local Scoped = require(script.Parent.Reactive.Scoped)
 
---// Typing
 local Types = require(script.Parent.Types)
 type Trait = Types.Trait
 type Self = Trait
@@ -15,16 +13,12 @@ type ComponentData<D> = Types.ComponentData<D>
 
 type Scoped<D> = Types.Scoped<D>
 
---// Constants
 local TRAIT_MARKER = {}
 
---// This
 local Trait = {}
 Trait.__index = Trait
-
 Trait[TRAIT_MARKER] = true
 
---// Functions
 local function NewTrait<Reqs...>(
     Query: Types.Query<Reqs...>,
     priority: number,
@@ -68,7 +62,7 @@ function Trait.Remove(self: Self, entity: Entity)
     local id = entity._id
     local scope = self._entityMap[id]
 
-    Clean(scope)
+    Clean(scope :: any)
 
     self._entityMap[id] = nil
 end

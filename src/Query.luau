@@ -1,19 +1,11 @@
 --!strict
---// Packages
 local Component = require(script.Parent.Component)
 local AssertComponent = Component.AssertComponent
 
---// Tping
 local Types = require(script.Parent.Types)
 type Query<Q...> = Types.Query<Q...>
 type Self = Query<unknown>
 
-type Component<D> = Types.Component<D>
-type ComponentData<D> = Types.ComponentData<D>
-
-type Dict<I, V> = Types.Dict<I, V>
-
---// This
 local Query  = {}
 Query.__index = Query
 
@@ -37,7 +29,7 @@ local function NewQuery(...)
     }, Query)
 end
 
-function Query.No(self: Self, ...: Component<unknown>)
+function Query.No(self: Self, ...: Types.Component<unknown>): Self
     checkAndSolve(...)
 
     self._no = { ... }
@@ -48,8 +40,8 @@ end
 function Query.Match(
     self: Self,
     entityID: number,
-    storage: Dict<unknown, Component<unknown>>
-)
+    storage: {[unknown]: Types.ComponentData<unknown>}
+): boolean
 
     for _, component in self._need do
         local id = component._id

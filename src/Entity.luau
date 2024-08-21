@@ -1,10 +1,8 @@
 --!strict
---// Packages
 local Component = require(script.Parent.Component)
 local AssertComponentData = Component.AssertComponentData
 local AssertComponent = Component.AssertComponent
 
---// Typing
 local Types = require(script.Parent.Types)
 type Self = Types.Entity
 type World = Types.World
@@ -12,11 +10,9 @@ type World = Types.World
 type Component<D> = Types.Component<D>
 type ComponentData<D> = Types.ComponentData<D>
 
---// This
 local Entity = {}
 Entity.__index = Entity
 
---// Functions
 local function NewEntity(world: World): Types.Entity
     
     local nextId = world._nextId
@@ -69,10 +65,10 @@ function Entity.Remove(self: Self, ...: Component<unknown>)
     self._world:_applyTraits(self, modified)
 end
 
-function Entity.Get(self: Self, ...: Component<unknown>)
+function Entity.Get(self: Self, ...: Component<unknown>): ...ComponentData<unknown>
 
-    local results = {} ::
-    Types.Array<ComponentData<unknown> | boolean>
+    local results
+        = {} :: { ComponentData<unknown> | boolean }
 
     for index, component in { ... } do
         
@@ -88,7 +84,7 @@ function Entity.Get(self: Self, ...: Component<unknown>)
         table.insert(results, datatype)
     end
 
-    return unpack(results)
+    return unpack(results :: any)
 end
 
 function Entity.Clear(self: Self)

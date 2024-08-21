@@ -1,5 +1,4 @@
 --!strict
---// Typing
 local Types = require(script.Types)
 
 export type World = Types.World
@@ -14,7 +13,6 @@ export type Value<D> = Types.Value<D>
 export type Scoped<D> = Types.Scoped<D>
 export type Computed<D> = Types.Computed<D>
 
---// Init
 return {
     World = require(script.World),
     Trait = require(script.Trait).New,
@@ -26,7 +24,6 @@ return {
     Scoped = require(script.Reactive.Scoped),
 
     Clean = require(script.Reactive.Clean),
-    Destruct = require(script.Reactive.Destruct),
     
     JoinData = require(script.Utils.JoinData),
 }
