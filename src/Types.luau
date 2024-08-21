@@ -8,6 +8,8 @@ export type State<value = unknown> = {
 }
 
 export type UpdateState = {
+    _busy: boolean,
+    _updated: boolean,
     _update: (self: UpdateState) -> boolean
 }
 

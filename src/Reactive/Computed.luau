@@ -1,5 +1,6 @@
 --!strict
 local Destruct = require(script.Parent.Destruct)
+local OutdateAll = require(script.Parent.OutdateAll)
 local UpdateAll = require(script.Parent.UpdateAll)
 
 local Types = require(script.Parent.Parent.Types)
@@ -18,16 +19,20 @@ local function NewComputed<value>(
         _processor = processor,
         _dependencySet = {},
         _value = nil,
+        _updated = false,
+        _busy = false,
         Destruct = Destruct
 
     }, Computed) :: any
 
-    self:Update()
+    self:_update()
 
     return self
 end
 
-function Computed.Update<value>(self: Self<value>): boolean
+function Computed._update<value>(self: Self<value>): boolean
+
+    if self._updated then return false end
 
     local function Use<engaged>(state: Types.UsedAs<engaged>): engaged
         
@@ -57,12 +62,17 @@ function Computed.Update<value>(self: Self<value>): boolean
     end
 
     self._value = newValue :: any
+    self._updated = true
+    self._busy = false
+
+    OutdateAll(self)
     UpdateAll(self)
     
     return true
 end
 
 function Computed.Get<value>(self: Self<value>): value
+    self:_update()
     return self._value
 end
 
