@@ -1,5 +1,6 @@
 --!strict
 local Destruct = require(script.Parent.Destruct)
+local OutdateAll = require(script.Parent.OutdateAll)
 local UpdateAll = require(script.Parent.UpdateAll)
 
 local Types = require(script.Parent.Parent.Types)
@@ -17,17 +18,25 @@ local function NewComputed<value>(
         _scope = scope,
         _processor = processor,
         _dependencySet = {},
+        _listening = {},
         _value = nil,
+        _updated = false,
+        _busy = false,
         Destruct = Destruct
 
     }, Computed) :: any
 
-    self:Update()
+    self:_update()
 
     return self
 end
 
-function Computed.Update<value>(self: Self<value>): boolean
+function Computed._update<value>(self: Self<value>): boolean
+
+    if self._updated then return false end
+
+    local oldListening = self._listening
+    local newListening = {}
 
     local function Use<engaged>(state: Types.UsedAs<engaged>): engaged
         
@@ -39,7 +48,8 @@ function Computed.Update<value>(self: Self<value>): boolean
             error('Invalid state: Dead state added')
         end
 
-        state._dependencySet[self] = true
+        local depSet = state._dependencySet
+        newListening[state] = depSet
 
         return state:Get()
     end
@@ -56,13 +66,22 @@ function Computed.Update<value>(self: Self<value>): boolean
         return false
     end
 
+    for listening, depSet in oldListening do depSet[self] = nil end
+    for listening, depSet in newListening do depSet[self] = Computed._update :: any end
+    self._listening = newListening
+
     self._value = newValue :: any
+    self._updated = true
+    self._busy = false
+
+    OutdateAll(self)
     UpdateAll(self)
     
     return true
 end
 
 function Computed.Get<value>(self: Self<value>): value
+    self:_update()
     return self._value
 end
 

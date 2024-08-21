@@ -1,0 +1,13 @@
+{
+    "name": "Celesta",
+    "tree": {
+        "$className": "DataModel",
+        "ServerStorage": { "$path": "tests" },
+        "ReplicatedStorage": {
+            "Packages": {
+                "$className": "Folder",
+                "Celesta": { "$path": "src" }
+            }
+        }
+    }
+}
