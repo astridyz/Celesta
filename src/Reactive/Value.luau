@@ -15,7 +15,7 @@ local function NewValue<value>(
 ): Types.Value<value>
 
     return setmetatable({
-        _current = value,
+        _value = value,
         _dependencySet = {},
         _scope = scope,
         Destruct = Destruct
