@@ -18,6 +18,7 @@ local function NewComputed<value>(
         _scope = scope,
         _processor = processor,
         _dependencySet = {},
+        _listening = {},
         _value = nil,
         _updated = false,
         _busy = false,
@@ -34,6 +35,9 @@ function Computed._update<value>(self: Self<value>): boolean
 
     if self._updated then return false end
 
+    local oldListening = self._listening
+    local newListening = {}
+
     local function Use<engaged>(state: Types.UsedAs<engaged>): engaged
         
         if typeof(state) ~= 'table' then
@@ -44,7 +48,8 @@ function Computed._update<value>(self: Self<value>): boolean
             error('Invalid state: Dead state added')
         end
 
-        state._dependencySet[self] = true
+        local depSet = state._dependencySet
+        newListening[state] = depSet
 
         return state:Get()
     end
@@ -60,6 +65,10 @@ function Computed._update<value>(self: Self<value>): boolean
     if self._value == newValue then
         return false
     end
+
+    for listening, depSet in oldListening do depSet[self] = nil end
+    for listening, depSet in newListening do depSet[self] = Computed._update :: any end
+    self._listening = newListening
 
     self._value = newValue :: any
     self._updated = true

@@ -1,8 +1,9 @@
 --!strict
+export type dependencySet =  {[UpdateState | (...any) -> ...any]: boolean}
 export type State<value = unknown> = {
     _value: value,
     _scope: Scoped,
-    _dependencySet: {[UpdateState | (...any) -> ...any]: boolean},
+    _dependencySet: dependencySet,
 
     Get: (self: State<value>) -> value,
 }
@@ -23,6 +24,7 @@ export type Value<value> = State<value> & {
 export type Computed<value> = State<value> & UpdateState & {
     _scope: Scoped<any>,
     _processor: UseFunction<unknown>,
+    _listening: { [State]: dependencySet },
 
     Destruct: (self: Computed<value>) -> ()
 }
