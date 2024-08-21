@@ -11,10 +11,10 @@ return function(tester)
             return 100 * 1.1^use(level)
         end)
 
-        assert(reqExp._value == 100 * 1.1^10)
+        assert(reqExp._value == 100 * 1.1^10, `didnt used initial level`)
 
         level:Set(15)
-        assert(reqExp._value == 100 * 1.1^15)
+        assert(reqExp._value == 100 * 1.1^15, `didnt used updated level`)
     end
     local function should_to_unlisten_unused_states(test)
 
@@ -27,16 +27,17 @@ return function(tester)
             return if count == 1 then use(src1) elseif count == 2 then use(src2) else 'cavalo'
         end)
 
-        assert(listener._value == 10)
+        assert(listener._value == 10, `didnt used initial src1`)
 
         src1:Set(15)
-        assert(listener._value == 20)
+        assert(listener._value == 20, `didnt used initial src2`)
 
         src1:Set(17)
-        assert(listener._value == 20)
+        assert(listener._value == 20, 'used updated src1')
 
         src2:Set(40)
-        assert(listener._value == 'cavalo')
+        src1:Set(20)
+        assert(listener._value == 'cavalo', `still using some src`)
     end
 
     return tester:run(
