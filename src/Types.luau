@@ -9,7 +9,6 @@ export type State<value = unknown> = {
 }
 
 export type UpdateState = {
-    _busy: boolean,
     _updated: boolean,
     _update: (self: UpdateState) -> boolean
 }
@@ -29,8 +28,8 @@ export type Computed<value> = State<value> & UpdateState & {
     Destruct: (self: Computed<value>) -> ()
 }
 
-export type UseFunction<value> = (state: UsedAs<value>) -> value
-export type UsedAs<value> = State<value> | value
+export type UseFunction<engaged> = (state: UsedAs<engaged>) -> engaged
+export type UsedAs<engaged> = State<engaged> | engaged
 
 export type Cleaning = Instance
     | RBXScriptConnection
@@ -58,8 +57,8 @@ export type ComponentData<data> = Scoped<data & {
     _name: string,
     _id: number,
 
-    Value: <data>(scope: Scoped, initialData: data?) -> Value<data>,
-    Computed: <data>(scope: Scoped, result: (use: <VD>(value: Value<VD>) -> VD) -> data) -> Computed<data>,
+    Value: <value>(scope: Scoped, initialData: value?) -> Value<value>,
+    Computed: <value>(scope: Scoped, processor: UseFunction<value>) -> Computed<value>,
     Clean: (scope: Scoped) -> (),
 
 } & typeof(setmetatable(
@@ -105,6 +104,7 @@ export type World = {
     _nextId: number,
     _storage: {[number]: Entity},
     _componentsMap: {[number]: { Trait }},
+    _cachedRelevants: {[string]: { Trait }},
     _traitMap: {[number]: {[Trait]: boolean}},
 
     _applyTraits: (self: World, entity: Entity, modified: { number }) -> (),

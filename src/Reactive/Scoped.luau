@@ -15,11 +15,7 @@ local function Scope(...: {[unknown]: unknown})
         JoinData(object, proxy)
     end
 
-    local scope = {}
-    
-    setmetatable(scope, proxy)
-
-    return scope
+    return setmetatable({}, proxy)
 end
 
 return (Scope :: any) :: Types.ScopedConstructor

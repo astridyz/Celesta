@@ -21,8 +21,6 @@ Components in Celesta are defined simply and intuitively.
   They are used to store data related to an entity. Here is an example of how to define components for health and regeneration:
 
 ```Lua
-type Value<D> = Celesta.Value<D>
-
 local Health = Celesta.Component {
     max = 100,
     current = 100

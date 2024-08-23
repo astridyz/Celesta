@@ -24,6 +24,7 @@ return {
     Scoped = require(script.Reactive.Scoped),
 
     Clean = require(script.Reactive.Clean),
+    Destruct = require(script.Reactive.Destruct),
     
     JoinData = require(script.Utils.JoinData),
 }

@@ -65,10 +65,12 @@ function Entity.Remove(self: Self, ...: Component<unknown>)
     self._world:_applyTraits(self, modified)
 end
 
-function Entity.Get(self: Self, ...: Component<unknown>): ...ComponentData<unknown>
+function Entity.Get(
+    self: Self,
+    ...: Component<unknown>
+): ...ComponentData<unknown> | boolean
 
-    local results
-        = {} :: { ComponentData<unknown> | boolean }
+    local results = {} :: { ComponentData<unknown> | boolean }
 
     for index, component in { ... } do
         
@@ -84,7 +86,7 @@ function Entity.Get(self: Self, ...: Component<unknown>): ...ComponentData<unkno
         table.insert(results, datatype)
     end
 
-    return unpack(results :: any)
+    return unpack(results)
 end
 
 function Entity.Clear(self: Self)

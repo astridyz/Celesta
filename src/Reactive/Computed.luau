@@ -1,7 +1,7 @@
 --!strict
 local Destruct = require(script.Parent.Destruct)
-local OutdateAll = require(script.Parent.OutdateAll)
-local UpdateAll = require(script.Parent.UpdateAll)
+local Outdate = require(script.Parent.OutdateAll)
+local Update = require(script.Parent.UpdateAll)
 
 local Types = require(script.Parent.Parent.Types)
 type Self<value> = Types.Computed<value>
@@ -15,13 +15,13 @@ local function NewComputed<value>(
 ): Types.Computed<value>
     
     local self = setmetatable({
+        
         _scope = scope,
         _processor = processor,
         _dependencySet = {},
         _listening = {},
         _value = nil,
         _updated = false,
-        _busy = false,
         Destruct = Destruct
 
     }, Computed) :: any
@@ -70,12 +70,10 @@ function Computed._update<value>(self: Self<value>): boolean
     for listening, depSet in newListening do depSet[self] = Computed._update :: any end
     self._listening = newListening
 
+    Outdate(self)
     self._value = newValue :: any
     self._updated = true
-    self._busy = false
-
-    OutdateAll(self)
-    UpdateAll(self)
+    Update(self)
     
     return true
 end

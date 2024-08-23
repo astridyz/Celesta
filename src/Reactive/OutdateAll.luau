@@ -8,7 +8,7 @@ local function OutdateAll(target: Types.State)
         if typeof(dependent) == 'function' then continue end
 
         dependent._updated = false
-        OutdateAll(dependent :: any) -- Types.Update should to be Types.State :angery:
+        OutdateAll(dependent :: any)
     end
 end
 

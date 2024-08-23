@@ -23,9 +23,15 @@ local function NewWorld(): World
         _storage = {},
         _componentsMap = {},
         _traitMap = {},
+        _cachedRelevants = {},
         _nextId = 1,
 
     }, World) :: any
+end
+
+local function generateCacheKey(modified: { number })
+    table.sort(modified)
+    return table.concat(modified, ",")
 end
 
 local function getRelevantTraits(
@@ -33,6 +39,13 @@ local function getRelevantTraits(
     entity: Entity,
     modified: { number }
 ): { Trait }
+
+    local cacheKey = generateCacheKey(modified)
+    local cache = world._cachedRelevants
+
+    if cache[cacheKey] then
+        return cache[cacheKey]
+    end
 
     local relevant = {}
 
@@ -44,6 +57,8 @@ local function getRelevantTraits(
             table.insert(relevant, trait)
         end
     end
+
+    cache[cacheKey] = relevant
 
     return relevant
 end
@@ -85,8 +100,9 @@ local function attachTraitColumn(
                 continue
             end
 
-            trait:Apply(entity, world, entity:Get(table.unpack(query._need)))
-    
+            trait:Apply(entity, world,
+                entity:Get(table.unpack(query._need)))
+
         elseif trait:isApplied(entity) then
             trait:Remove(entity)
 

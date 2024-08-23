@@ -1,7 +1,7 @@
 --!strict
 local Destruct = require(script.Parent.Destruct)
-local OutdateAll = require(script.Parent.OutdateAll)
-local UpdateAll = require(script.Parent.UpdateAll)
+local Outdate = require(script.Parent.OutdateAll)
+local Update = require(script.Parent.UpdateAll)
 
 local Types = require(script.Parent.Parent.Types)
 type Self<value> = Types.Value<value>
@@ -15,6 +15,7 @@ local function NewValue<value>(
 ): Types.Value<value>
 
     return setmetatable({
+        
         _value = value,
         _dependencySet = {},
         _scope = scope,
@@ -35,9 +36,9 @@ function Value.Set<value>(
         return
     end
 
+    Outdate(self)
     self._value = newValue
-    OutdateAll(self)
-    UpdateAll(self)
+    Update(self)
 
     return newValue
 end

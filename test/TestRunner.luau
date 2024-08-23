@@ -5,8 +5,10 @@ local function tester(name: string)
         tests = {},
         name = name,
     }
+
     function self:run(...: () -> ())
-        for _,job in {...} do
+
+        for _, job in { ... } do
             local name = debug.info(job, 'n')
             local test = tester(name)
 
@@ -14,6 +16,7 @@ local function tester(name: string)
             test.result = table.pack(pcall(job, test))
         end
     end
+
     return self
 end
 return tester('global')
