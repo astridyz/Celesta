@@ -15,16 +15,15 @@
 }
 
 .md-footer {
-    padding: 1rem 0;
+    padding: 2rem;
 }
 
 .md-footer__inner {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1200px;
+    max-width: 45rem;
     margin: 0 auto;
-    padding: 0 20px;
 }
 
 .md-footer__link {
@@ -54,4 +53,12 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
+}
+
+.md-content hr {
+    background-color: var(--celestadoc-primary);
+}
+
+h1, h2, h3 {
+    font-weight: bold !important;
 }

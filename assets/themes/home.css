@@ -8,6 +8,10 @@
     margin: auto;
 }
 
+.hero-content h1 {
+    font-weight: normal !important;
+}
+
 .hero .logo {
     max-width: 250px;
     margin-bottom: 20px;

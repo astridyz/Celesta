@@ -2,22 +2,27 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://astridyz.github.io/Celesta/</loc>
-         <lastmod>2024-08-16</lastmod>
+         <lastmod>2024-08-23</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://astridyz.github.io/Celesta/Core%20Concepts/Components/</loc>
+         <lastmod>2024-08-23</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://astridyz.github.io/Celesta/Learning/</loc>
-         <lastmod>2024-08-16</lastmod>
+         <lastmod>2024-08-23</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://astridyz.github.io/Celesta/Learning/Contributing/</loc>
-         <lastmod>2024-08-16</lastmod>
+         <lastmod>2024-08-23</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://astridyz.github.io/Celesta/Learning/Downloading/</loc>
-         <lastmod>2024-08-16</lastmod>
+         <lastmod>2024-08-23</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
