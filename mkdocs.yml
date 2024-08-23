@@ -31,14 +31,21 @@ theme:
     - navigation.sections
     - navigation.instant
     - navigation.indexes
-    - search.highlight
-    - search.suggest
-    - toc.integrate
+    - navigation.footer
     - navigation.expand
 
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+
+    - search.highlight
+    - search.suggest
+    - toc.follow
+
   font:
-    text: Plus Jakarta Sans
-    code: JetBrains Mono
+    text: Figtree
+    code: Overpass Mono
 
 extra_css:
   - assets/themes/celestadoc.css
@@ -46,6 +53,7 @@ extra_css:
   - assets/themes/page.css
   - assets/themes/home.css
   - assets/themes/code.css
+  - assets/themes/admonition.css
 
 nav:
   - Home: index.md
@@ -54,5 +62,14 @@ nav:
     - Downloading: Learning/Downloading.md
     - Contributing: Learning/Contributing.md
 
+    - Core Concepts:
+      - Components: Core Concepts/Components.md
+
+
 markdown_extensions:
   - pymdownx.superfences
+  - pymdownx.betterem
+  - pymdownx.details
+  - admonition
+  - attr_list
+  - md_in_html

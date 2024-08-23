@@ -22,10 +22,7 @@ local GLOBAL_METHODS = {
 local Component = {}
 Component.__index = Component
 
-local function NewComponent<default>(
-    name: string?,
-    default: default?
-): Types.Component<default>
+local function NewComponent<default>(default: default?): Types.Component<default>
     
     ID += 1
 
@@ -33,7 +30,6 @@ local function NewComponent<default>(
 
         _id = ID,
         _default = default,
-        _name = name or tostring(ID),
 
         [COMPONENT_MARKER] = true
 
