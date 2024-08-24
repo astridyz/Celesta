@@ -125,8 +125,8 @@ end
 local function IndexComponentsByTrait(world: World, trait: Trait)
     local componentsMap = world._componentsMap
 
-    for _, component in ipairs(trait._query._need) do
-    
+    for _, component in ipairs(trait._query._all) do
+
         local id = component._id
 
         if not componentsMap[id] then

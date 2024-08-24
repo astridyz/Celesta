@@ -67,7 +67,8 @@ export type ComponentData<data> = Scoped<data & {
 
 export type Query<querying...> = {
     _no: { Component<unknown> },
-    _need: { Component<unknown> } ,
+    _need: { Component<unknown> },
+    _all : { Component<unknown> },
 
     No: (self: Query<querying...>, ...Component<unknown>) -> Query<querying...>,
     Match: (self: Query<querying...>, entityID: number, storage: {[number]: ComponentData<unknown>}) -> boolean,

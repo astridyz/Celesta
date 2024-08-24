@@ -6,33 +6,49 @@ local Types = require(script.Parent.Types)
 type Query<Q...> = Types.Query<Q...>
 type Self = Query<unknown>
 
+type Component<D> = Types.Component<D>
+
 local Query  = {}
 Query.__index = Query
 
 --// Functions
-local function checkAndSolve(...)
+local function checkAndSolve(
+    query: Query<unknown>,
+    ...: Component<unknown>
+): { Component<unknown> }
+
+    local all = query._all
+    local field = {}
+
     for index, component in { ... } do
+
         AssertComponent(component, index)
+
+        table.insert(all, component)
+        table.insert(field, component)
     end
+
+    return field
 end
 
 local function NewQuery(...)
     
-    checkAndSolve(...)
-
-    return setmetatable({
+    local self = setmetatable({
 
         _no = {},
         _on = {},
-        _need = { ... }
+        _need = {},
+        _all = {}
 
-    }, Query)
+    }, Query) :: any
+
+    self._need = checkAndSolve(self, ...)
+
+    return self
 end
 
-function Query.No(self: Self, ...: Types.Component<unknown>): Self
-    checkAndSolve(...)
-
-    self._no = { ... }
+function Query.No(self: Self, ...: Component<unknown>): Self
+    self._no = checkAndSolve(self, ...)
 
     return self
 end
@@ -43,7 +59,7 @@ function Query.Match(
     storage: {[unknown]: Types.ComponentData<unknown>}
 ): boolean
 
-    for _, component in self._need do
+    for _, component in ipairs(self._need) do
         local id = component._id
 
         if not storage[id] then
@@ -51,7 +67,7 @@ function Query.Match(
         end
     end
 
-    for _, component in self._no do
+    for _, component in ipairs(self._no) do
         local id = component._id
 
         if storage[id] then
