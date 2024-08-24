@@ -30,18 +30,19 @@ theme:
     - navigation.tracking
     - navigation.sections
     - navigation.instant
+    - navigation.instant.progress
     - navigation.indexes
     - navigation.footer
     - navigation.expand
 
     - content.action.edit
-    - content.action.view
     - content.code.annotate
     - content.code.copy
 
     - search.highlight
     - search.suggest
-    - toc.follow
+
+  language: en
 
   font:
     text: Figtree
@@ -70,6 +71,8 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.betterem
   - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
   - admonition
   - attr_list
   - md_in_html

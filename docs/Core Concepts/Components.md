@@ -1,7 +1,5 @@
 In Celesta, components are essential data structures associated with entities. They store the various attributes and states that define an entity's behavior and characteristics.
 
------
-
 ### What are Components?
 
 Components are simple data containers attached to entities. They hold specific pieces of information related to an entity, such as position, health, or custom attributes. Components do not contain logic or behavior; instead, they purely represent data.
@@ -28,8 +26,6 @@ local Velocity = Celesta.Component {
 
 !!! warning "Luau type-checking"
     Unfortunately, this approach may lead to type-cast errors. As a workaround, you might need to use ``--!nocheck`` at the beginning of the code to bypass these type-checking issues.
-
------
 
 Components don’t necessarily need a default data; you can later add more fields or simply not use any.
 
