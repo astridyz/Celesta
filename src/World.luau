@@ -30,7 +30,6 @@ local function NewWorld(): World
 end
 
 local function generateCacheKey(modified: { number })
-    table.sort(modified)
     return table.concat(modified, ",")
 end
 

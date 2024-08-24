@@ -1,3 +1,4 @@
+--!strict
 local Clean = require(script.Parent.Reactive.Clean)
 local JoinData = require(script.Parent.Utils.JoinData)
 
@@ -25,11 +26,10 @@ Component.__index = Component
 local function NewComponent<default>(default: default?): Types.Component<default>
     
     ID += 1
-
     return setmetatable({
 
         _id = ID,
-        _default = default,
+        _default = default or {},
 
         [COMPONENT_MARKER] = true
 
@@ -43,16 +43,11 @@ function Component.New<default>(
     
     local data = Scoped(
         GLOBAL_METHODS,
-        self :: any
-    )
+        self
+    ) :: any
 
     mergeData = mergeData or {}
-
-    local default = self._default
-
-    if default then
-        JoinData(default, mergeData)
-    end
+    JoinData(self._default, mergeData)
 
     for index, value in mergeData do
         data[index] = data:Value(value)
@@ -65,11 +60,11 @@ function Component.__call<default>(self: Self<default>, mergeData: Merging): def
     return self:New(mergeData)
 end
 
-local function AssertType(object, index)
+local function AssertType(object, index: number)
     assert(typeof(object) == 'table', 'Component #' .. index .. ' is invalid: not a table')
 end
 
-local function AssertComponent(object, index)
+local function AssertComponent(object, index: number)
     AssertType(object, index)
 
     assert(object[COMPONENT_MARKER],
@@ -77,7 +72,7 @@ local function AssertComponent(object, index)
     )
 end
 
-local function AssertComponentData(object, index)
+local function AssertComponentData(object, index: number)
     AssertType(object, index)
 
     local metatable = getmetatable(object)
