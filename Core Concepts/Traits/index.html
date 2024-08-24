@@ -786,7 +786,7 @@
 </ul>
 <p>These parameters provide the necessary context and data for the trait to function correctly.</p>
 <h3 id="evaluating-traits">Evaluating traits</h3>
-<p>When you perform an action that trigger a trait to be applied inside a trait, the trait will yield until all the traits that were triggered have been applied.</p>
+<p>When you perform an action that trigger a trait to be applied inside a trait, the trait will yield until all the traits that were triggered have been applied. This does not mean that yielding traits will cause the current trait to yield indefinitely.</p>
 <p>This ensures that all traits that are activated by an action are processed completely before any further actions or evaluations occur.</p>
 <div class="admonition warning">
 <p class="admonition-title">Trait flow are not handled automatically</p>
