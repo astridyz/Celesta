@@ -1,4 +1,3 @@
---!nolint
 --!strict
 local Trait = require(script.Parent.Trait)
 local AssertValidTrait = Trait.AssertTrait
@@ -64,15 +63,15 @@ local function ArchetypeCreate(
         return archetype
     end
 
-    local archetype = {
+    local newArchetype = {
         traits = {},
         typeSet = {},
         hash = hash
     }
 
-    world._archetypeIndex[hash] = archetype
+    world._archetypeIndex[hash] = newArchetype
 
-    return archetype
+    return newArchetype
 end
 
 local function ArchetypeMerge(
@@ -121,14 +120,10 @@ local function ArchetypeTraitTransition(
         error('Invalid trait query: must have at least 1 component')    
     end
 
-    local types = table.create(length)
+    local types = {}
 
-    for i = 1, length do
-        
-        local component = components[i]
-        local id = component._id
-
-        table.insert(types, id)
+    for _, component in ipairs(components) do
+        table.insert(types, component._id)
     end
 
     local componentsIndex = world._componentsIndex
@@ -155,23 +150,13 @@ local function ArchetypeTraitTransition(
 
     table.insert(newArchetype.traits, trait)
 
-    world._traitArchetypes[trait] = newArchetype
-
     for _, updateArchetype in pairs(world._archetypeIndex) do
-
-        local componentsArchetypes = {}
-
-        for _, archetype in pairs(world._archetypeIndex) do
-
-            if archetype ~= updateArchetype then
-                if IsTypeSubset(updateArchetype.typeSet, archetype.typeSet) then
-                    table.insert(componentsArchetypes, archetype)
-                end
-            end
+        if IsTypeSubset(updateArchetype.typeSet, newArchetype.typeSet) then
+            ArchetypeMerge(updateArchetype, { newArchetype })
         end
-
-        ArchetypeMerge(updateArchetype, componentsArchetypes)
     end
+
+    world._traitArchetypes[trait] = newArchetype
 end
 
 local function GetRelevantTraitsFromArchetype(
