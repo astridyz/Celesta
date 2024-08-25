@@ -35,8 +35,21 @@ end
 
 local function ArchetypeHash(types: { ID }): Types.Hash
     table.sort(types)
-
     return table.concat(types, '_')
+end
+
+local function IsTypeSubset(
+    typeSet: { [ID]: boolean },
+    smallTypes : { [ID]: boolean }
+): boolean
+
+    for t in pairs(smallTypes) do
+        if not typeSet[t] then
+            return false
+        end
+    end
+
+    return true
 end
 
 local function ArchetypeCreate(
@@ -53,7 +66,7 @@ local function ArchetypeCreate(
 
     local archetype = {
         traits = {},
-        records = {},
+        typeSet = {},
         hash = hash
     }
 
@@ -62,13 +75,46 @@ local function ArchetypeCreate(
     return archetype
 end
 
+local function ArchetypeMerge(
+    baseArchetype: Archetype,
+    additionalArchetypes: { Archetype }
+)
+
+    local requiredTypes = baseArchetype.typeSet
+
+    for _, archetype in ipairs(additionalArchetypes) do
+        for _, trait in ipairs(archetype.traits) do
+
+            if table.find(baseArchetype.traits, trait) then
+                continue
+            end
+
+            local skip = false
+
+            for id in pairs(archetype.typeSet) do
+                
+                if not requiredTypes[id] then
+                    skip = true
+                    break
+                end
+            end
+
+            if skip then
+                continue
+            end
+
+            table.insert(baseArchetype.traits, trait)
+        end
+
+    end
+end
+
 local function ArchetypeTraitTransition(
     world: World,
     trait: Trait
 )
 
     local components = trait._query._all
-
     local length = #components
 
     if length == 0 then
@@ -85,21 +131,8 @@ local function ArchetypeTraitTransition(
         table.insert(types, id)
     end
 
-    local oldArchetype = world._traitArchetypes[trait]
-    local newArchetype = ArchetypeCreate(world, types)
-
-    if oldArchetype and oldArchetype ~= newArchetype then
-
-        local traitIndex = table.find(oldArchetype.traits, trait)
-
-        if not traitIndex then
-            error('Invalid archetype generation')
-        end
-
-        table.remove(oldArchetype.traits, traitIndex)
-    end
-
     local componentsIndex = world._componentsIndex
+    local newArchetype = ArchetypeCreate(world, types)
 
     for _, id in ipairs(types) do
 
@@ -107,18 +140,47 @@ local function ArchetypeTraitTransition(
             componentsIndex[id] = {}
         end
 
-        table.insert(componentsIndex[id], newArchetype.hash)
+        local archetypes = componentsIndex[id]
+
+        if not table.find(archetypes, newArchetype.hash) then
+            table.insert(archetypes, newArchetype.hash)
+        end
+
+        newArchetype.typeSet[id] = true
+    end
+
+    if table.find(newArchetype.traits, trait) then
+        error('Duplicated trait in archetype: ' .. newArchetype.hash)
     end
 
     table.insert(newArchetype.traits, trait)
+
+    world._traitArchetypes[trait] = newArchetype
+
+    for _, updateArchetype in pairs(world._archetypeIndex) do
+
+        local componentsArchetypes = {}
+
+        for _, archetype in pairs(world._archetypeIndex) do
+
+            if archetype ~= updateArchetype then
+                if IsTypeSubset(updateArchetype.typeSet, archetype.typeSet) then
+                    table.insert(componentsArchetypes, archetype)
+                end
+            end
+        end
+
+        ArchetypeMerge(updateArchetype, componentsArchetypes)
+    end
 end
 
 local function GetRelevantTraitsFromArchetype(
     world: World,
     types: { ID }
-): { Trait }?
+): { [Trait]: boolean }?
     
     local relevantTraits = {}
+    local firstMap;
 
     for _, id in ipairs(types) do
         
@@ -128,17 +190,21 @@ local function GetRelevantTraitsFromArchetype(
             return
         end
 
-        for _, hash in ipairs(map) do
+        if firstMap == nil or #firstMap < #map then
+            firstMap = map
+        end
+    end
+
+    for _, hash in ipairs(firstMap) do
         
-            local compatibleArchetype = world._archetypeIndex[hash]
-    
-            if #compatibleArchetype.traits == 0 then
-                continue
-            end
-    
-            for _, trait in ipairs(compatibleArchetype.traits) do
-                table.insert(relevantTraits, trait)
-            end
+        local compatibleArchetype = world._archetypeIndex[hash]
+
+        if #compatibleArchetype.traits == 0 then
+            continue
+        end
+
+        for _, trait in ipairs(compatibleArchetype.traits) do
+            relevantTraits[trait] = true
         end
     end
 
@@ -147,12 +213,12 @@ end
 
 local function filterRowTraits(
     row: {[Trait]: boolean},
-    traits: { Trait }
+    traitSet: { [Trait]: boolean }
 ): { Trait }
 
     local filtered = {}
     
-    for _, trait in ipairs(traits) do
+    for trait in pairs(traitSet) do
         if not row[trait] then
             continue
         end
@@ -167,10 +233,10 @@ local function attachTraitRow(
     world: World,
     entity: Entity,
     row: {[Trait]: boolean},
-    traits: { Trait }
+    traitSet: { [Trait]: boolean }
 )
 
-    local columnFilter = filterRowTraits(row, traits)
+    local columnFilter = filterRowTraits(row, traitSet)
 
     for _, trait in ipairs(columnFilter) do
 

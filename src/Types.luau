@@ -102,6 +102,7 @@ export type Entity = {
 
 export type Archetype = {
     traits: { Trait },
+    typeSet: {[number]: boolean},
     hash: Hash
 }
 
