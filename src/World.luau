@@ -1,6 +1,7 @@
+--!nolint
 --!strict
 local Trait = require(script.Parent.Trait)
-local AssertTrait = Trait.AssertTrait
+local AssertValidTrait = Trait.AssertTrait
 
 local Entity = require(script.Parent.Entity)
 
@@ -11,65 +12,148 @@ type Self = World
 type Entity = Types.Entity
 
 type Trait = Types.Trait
-type ComponentData<D> = Types.ComponentData<D>
+type Archetype = Types.Archetype
+
+export type ID = number
 
 local World = {}
 World.__index = World
 
-local function NewWorld(): World
+local function NewWorld(): Types.World
 
     return setmetatable({
 
-        _storage = {},
-        _componentsMap = {},
         _traitMap = {},
-        _cachedRelevants = {},
+        _traitArchetypes = {},
+        _archetypeIndex = {},
         _nextId = 1,
+        _componentsIndex = {},
+        _storage = {}
 
     }, World) :: any
 end
 
-local function generateCacheKey(modified: { number })
-    return table.concat(modified, ",")
+local function ArchetypeHash(types: { ID }): Types.Hash
+    table.sort(types)
+
+    return table.concat(types, '_')
 end
 
-local function getRelevantTraits(
+local function ArchetypeCreate(
     world: World,
-    entity: Entity,
-    modified: { number }
-): { Trait }
+    types: { ID }
+): Archetype
 
-    local cacheKey = generateCacheKey(modified)
-    local cache = world._cachedRelevants
+    local hash = ArchetypeHash(types)
+    local archetype = world._archetypeIndex[hash]
 
-    if cache[cacheKey] then
-        return cache[cacheKey]
+    if archetype then
+        return archetype
     end
 
-    local relevant = {}
+    local archetype = {
+        traits = {},
+        records = {},
+        hash = hash
+    }
 
-    for _, id in ipairs(modified) do
+    world._archetypeIndex[hash] = archetype
+
+    return archetype
+end
+
+local function ArchetypeTraitTransition(
+    world: World,
+    trait: Trait
+)
+
+    local components = trait._query._all
+
+    local length = #components
+
+    if length == 0 then
+        error('Invalid trait query: must have at least 1 component')    
+    end
+
+    local types = table.create(length)
+
+    for i = 1, length do
         
-        local componentTraits = world._componentsMap[id]
+        local component = components[i]
+        local id = component._id
 
-        for _, trait in ipairs(componentTraits) do
-            table.insert(relevant, trait)
+        table.insert(types, id)
+    end
+
+    local oldArchetype = world._traitArchetypes[trait]
+    local newArchetype = ArchetypeCreate(world, types)
+
+    if oldArchetype and oldArchetype ~= newArchetype then
+
+        local traitIndex = table.find(oldArchetype.traits, trait)
+
+        if not traitIndex then
+            error('Invalid archetype generation')
+        end
+
+        table.remove(oldArchetype.traits, traitIndex)
+    end
+
+    local componentsIndex = world._componentsIndex
+
+    for _, id in ipairs(types) do
+
+        if not componentsIndex[id] then
+            componentsIndex[id] = {}
+        end
+
+        table.insert(componentsIndex[id], newArchetype.hash)
+    end
+
+    table.insert(newArchetype.traits, trait)
+end
+
+local function GetRelevantTraitsFromArchetype(
+    world: World,
+    types: { ID }
+): { Trait }?
+    
+    local relevantTraits = {}
+
+    for _, id in ipairs(types) do
+        
+        local map = world._componentsIndex[id]
+
+        if not map then
+            return
+        end
+
+        for _, hash in ipairs(map) do
+        
+            local compatibleArchetype = world._archetypeIndex[hash]
+    
+            if #compatibleArchetype.traits == 0 then
+                continue
+            end
+    
+            for _, trait in ipairs(compatibleArchetype.traits) do
+                table.insert(relevantTraits, trait)
+            end
         end
     end
 
-    cache[cacheKey] = relevant
-
-    return relevant
+    return relevantTraits
 end
 
-local function filterColumnTraits(
-    column: {[Trait]: boolean},
+local function filterRowTraits(
+    row: {[Trait]: boolean},
     traits: { Trait }
 ): { Trait }
+
     local filtered = {}
     
     for _, trait in ipairs(traits) do
-        if not column[trait] then
+        if not row[trait] then
             continue
         end
 
@@ -79,14 +163,14 @@ local function filterColumnTraits(
     return filtered
 end
 
-local function attachTraitColumn(
+local function attachTraitRow(
     world: World,
     entity: Entity,
-    column: {[Trait]: boolean},
+    row: {[Trait]: boolean},
     traits: { Trait }
 )
 
-    local columnFilter = filterColumnTraits(column, traits)
+    local columnFilter = filterRowTraits(row, traits)
 
     for _, trait in ipairs(columnFilter) do
 
@@ -115,35 +199,22 @@ function World._applyTraits(
     modified: { number }
 )
 
-    local relevant = getRelevantTraits(self, entity, modified)
+    local relevant = GetRelevantTraitsFromArchetype(self, modified)
+    if not relevant then return end
 
-    for _, column in pairs(self._traitMap) do
-        attachTraitColumn(self, entity, column, relevant)
-    end
-end
-
-local function IndexComponentsByTrait(world: World, trait: Trait)
-    local componentsMap = world._componentsMap
-
-    for _, component in ipairs(trait._query._all) do
-
-        local id = component._id
-
-        if not componentsMap[id] then
-            componentsMap[id] = {}
-        end
-
-        table.insert(componentsMap[id], trait)
+    for _, row in pairs(self._traitMap) do
+        attachTraitRow(self, entity, row, relevant)
     end
 end
 
 function World.Import(self: Self, ...: Trait)
+    local traits = self._traitMap
+
     for index, trait in { ... } do
         
-        AssertTrait(trait, index)
+        AssertValidTrait(trait, index)
 
         local priority = trait._priority
-        local traits = self._traitMap
 
         if not traits[priority] then
             traits[priority] = {}
@@ -151,11 +222,15 @@ function World.Import(self: Self, ...: Trait)
 
         traits[priority][trait] = true
 
-        IndexComponentsByTrait(self, trait)
+        ArchetypeTraitTransition(self, trait)
     end
 end
 
-function World.Entity(self: Self, ...: ComponentData<unknown>): Entity
+function World.Entity(
+    self: Self,
+    ...: Types.ComponentData<unknown>
+)
+
     local entity = Entity(self)
     self._storage[entity._id] = entity
 
@@ -183,5 +258,6 @@ function World.Despawn(self: Self, ID: number)
 
     entity:Destruct()
 end
+
 
 return NewWorld
