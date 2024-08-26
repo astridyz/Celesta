@@ -74,37 +74,17 @@ local function ArchetypeCreate(
     return newArchetype
 end
 
-local function ArchetypeMerge(
+local function ArchetypeTraitMerge(
     baseArchetype: Archetype,
-    additionalArchetypes: { Archetype }
+    unityArchetype: Archetype 
 )
 
-    local requiredTypes = baseArchetype.typeSet
-
-    for _, archetype in ipairs(additionalArchetypes) do
-        for _, trait in ipairs(archetype.traits) do
-
-            if table.find(baseArchetype.traits, trait) then
-                continue
-            end
-
-            local skip = false
-
-            for id in pairs(archetype.typeSet) do
-                
-                if not requiredTypes[id] then
-                    skip = true
-                    break
-                end
-            end
-
-            if skip then
-                continue
-            end
-
-            table.insert(baseArchetype.traits, trait)
+    for _, trait in ipairs(unityArchetype.traits) do
+        if table.find(baseArchetype.traits, trait) then
+            continue
         end
 
+        table.insert(baseArchetype.traits, trait)
     end
 end
 
@@ -152,7 +132,7 @@ local function ArchetypeTraitTransition(
 
     for _, updateArchetype in pairs(world._archetypeIndex) do
         if IsTypeSubset(updateArchetype.typeSet, newArchetype.typeSet) then
-            ArchetypeMerge(updateArchetype, { newArchetype })
+            ArchetypeTraitMerge(updateArchetype, newArchetype)
         end
     end
 
@@ -196,7 +176,7 @@ local function GetRelevantTraitsFromArchetype(
     return relevantTraits
 end
 
-local function filterRowTraits(
+local function FilterTraitRowFromTraitset(
     row: {[Trait]: boolean},
     traitSet: { [Trait]: boolean }
 ): { Trait }
@@ -214,14 +194,14 @@ local function filterRowTraits(
     return filtered
 end
 
-local function attachTraitRow(
+local function AttachTraitRow(
     world: World,
     entity: Entity,
     row: {[Trait]: boolean},
     traitSet: { [Trait]: boolean }
 )
 
-    local columnFilter = filterRowTraits(row, traitSet)
+    local columnFilter = FilterTraitRowFromTraitset(row, traitSet)
 
     for _, trait in ipairs(columnFilter) do
 
@@ -254,7 +234,7 @@ function World._applyTraits(
     if not relevant then return end
 
     for _, row in pairs(self._traitMap) do
-        attachTraitRow(self, entity, row, relevant)
+        AttachTraitRow(self, entity, row, relevant)
     end
 end
 
