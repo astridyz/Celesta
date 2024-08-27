@@ -100,13 +100,21 @@ export type Entity = {
     Destruct: (self: Entity) -> ()
 }
 
-export type World = {
+export type Archetype = {
+    traits: { Trait },
+    typeSet: {[number]: boolean},
+    hash: Hash
+}
 
-    _nextId: number,
-    _storage: {[number]: Entity},
-    _componentsMap: {[number]: { Trait }},
-    _cachedRelevants: {[string]: { Trait }},
+export type Hash = string
+
+export type World = {
     _traitMap: {[number]: {[Trait]: boolean}},
+    _traitArchetypes: {[Trait]: Archetype},
+    _archetypeIndex: {[string]: Archetype},
+    _nextId: number,
+    _componentsIndex: {[number]: { string }},
+    _storage: {[number]: Entity},
 
     _applyTraits: (self: World, entity: Entity, modified: { number }) -> (),
 

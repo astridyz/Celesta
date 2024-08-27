@@ -1,6 +1,6 @@
 --!strict
 local Trait = require(script.Parent.Trait)
-local AssertTrait = Trait.AssertTrait
+local AssertValidTrait = Trait.AssertTrait
 
 local Entity = require(script.Parent.Entity)
 
@@ -11,65 +11,180 @@ type Self = World
 type Entity = Types.Entity
 
 type Trait = Types.Trait
-type ComponentData<D> = Types.ComponentData<D>
+type Archetype = Types.Archetype
+
+export type ID = number
 
 local World = {}
 World.__index = World
 
-local function NewWorld(): World
+local function NewWorld(): Types.World
 
     return setmetatable({
 
-        _storage = {},
-        _componentsMap = {},
         _traitMap = {},
-        _cachedRelevants = {},
+        _traitArchetypes = {},
+        _archetypeIndex = {},
         _nextId = 1,
+        _componentsIndex = {},
+        _storage = {}
 
     }, World) :: any
 end
 
-local function generateCacheKey(modified: { number })
-    return table.concat(modified, ",")
+local function ArchetypeHash(types: { ID }): Types.Hash
+    table.sort(types)
+    return table.concat(types, '_')
 end
 
-local function getRelevantTraits(
-    world: World,
-    entity: Entity,
-    modified: { number }
-): { Trait }
+local function IsTypeSubset(
+    typeSet: { [ID]: boolean },
+    smallTypes : { [ID]: boolean }
+): boolean
 
-    local cacheKey = generateCacheKey(modified)
-    local cache = world._cachedRelevants
-
-    if cache[cacheKey] then
-        return cache[cacheKey]
-    end
-
-    local relevant = {}
-
-    for _, id in ipairs(modified) do
-        
-        local componentTraits = world._componentsMap[id]
-
-        for _, trait in ipairs(componentTraits) do
-            table.insert(relevant, trait)
+    for t in pairs(smallTypes) do
+        if not typeSet[t] then
+            return false
         end
     end
 
-    cache[cacheKey] = relevant
-
-    return relevant
+    return true
 end
 
-local function filterColumnTraits(
-    column: {[Trait]: boolean},
-    traits: { Trait }
+local function ArchetypeCreate(
+    world: World,
+    types: { ID }
+): Archetype
+
+    local hash = ArchetypeHash(types)
+    local archetype = world._archetypeIndex[hash]
+
+    if archetype then
+        return archetype
+    end
+
+    local newArchetype = {
+        traits = {},
+        typeSet = {},
+        hash = hash
+    }
+
+    world._archetypeIndex[hash] = newArchetype
+
+    return newArchetype
+end
+
+local function ArchetypeTraitMerge(
+    baseArchetype: Archetype,
+    unityArchetype: Archetype 
+)
+
+    for _, trait in ipairs(unityArchetype.traits) do
+        if table.find(baseArchetype.traits, trait) then
+            continue
+        end
+
+        table.insert(baseArchetype.traits, trait)
+    end
+end
+
+local function ArchetypeTraitTransition(
+    world: World,
+    trait: Trait
+)
+
+    local components = trait._query._all
+    local length = #components
+
+    if length == 0 then
+        error('Invalid trait query: must have at least 1 component')    
+    end
+
+    local types = {}
+
+    for _, component in ipairs(components) do
+        table.insert(types, component._id)
+    end
+
+    local componentsIndex = world._componentsIndex
+    local newArchetype = ArchetypeCreate(world, types)
+
+    for _, id in ipairs(types) do
+
+        if not componentsIndex[id] then
+            componentsIndex[id] = {}
+        end
+
+        local archetypes = componentsIndex[id]
+
+        if not table.find(archetypes, newArchetype.hash) then
+            table.insert(archetypes, newArchetype.hash)
+        end
+
+        newArchetype.typeSet[id] = true
+    end
+
+    if table.find(newArchetype.traits, trait) then
+        error('Duplicated trait in archetype: ' .. newArchetype.hash)
+    end
+
+    table.insert(newArchetype.traits, trait)
+
+    for _, updateArchetype in pairs(world._archetypeIndex) do
+        if IsTypeSubset(updateArchetype.typeSet, newArchetype.typeSet) then
+            ArchetypeTraitMerge(updateArchetype, newArchetype)
+        end
+    end
+
+    world._traitArchetypes[trait] = newArchetype
+end
+
+local function GetRelevantTraitsFromArchetype(
+    world: World,
+    types: { ID }
+): { [Trait]: boolean }?
+    
+    local relevantTraits = {}
+    local firstMap;
+
+    for _, id in ipairs(types) do
+        
+        local map = world._componentsIndex[id]
+
+        if not map then
+            return
+        end
+
+        if firstMap == nil or #firstMap < #map then
+            firstMap = map
+        end
+    end
+
+    for _, hash in ipairs(firstMap) do
+        
+        local compatibleArchetype = world._archetypeIndex[hash]
+
+        if #compatibleArchetype.traits == 0 then
+            continue
+        end
+
+        for _, trait in ipairs(compatibleArchetype.traits) do
+            relevantTraits[trait] = true
+        end
+    end
+
+    return relevantTraits
+end
+
+local function FilterTraitRowFromTraitset(
+    row: {[Trait]: boolean},
+    traitSet: { [Trait]: boolean }
 ): { Trait }
+
     local filtered = {}
     
-    for _, trait in ipairs(traits) do
-        if not column[trait] then
+    for trait in pairs(traitSet) do
+        if not row[trait] then
             continue
         end
 
@@ -79,14 +194,14 @@ local function filterColumnTraits(
     return filtered
 end
 
-local function attachTraitColumn(
+local function AttachTraitRow(
     world: World,
     entity: Entity,
-    column: {[Trait]: boolean},
-    traits: { Trait }
+    row: {[Trait]: boolean},
+    traitSet: { [Trait]: boolean }
 )
 
-    local columnFilter = filterColumnTraits(column, traits)
+    local columnFilter = FilterTraitRowFromTraitset(row, traitSet)
 
     for _, trait in ipairs(columnFilter) do
 
@@ -115,35 +230,22 @@ function World._applyTraits(
     modified: { ID }
 )
 
-    local relevant = getRelevantTraits(self, entity, modified)
+    local relevant = GetRelevantTraitsFromArchetype(self, modified)
+    if not relevant then return end
 
-    for _, column in pairs(self._traitMap) do
-        attachTraitColumn(self, entity, column, relevant)
-    end
-end
-
-local function IndexComponentsByTrait(world: World, trait: Trait)
-    local componentsMap = world._componentsMap
-
-    for _, component in ipairs(trait._query._all) do
-
-        local id = component._id
-
-        if not componentsMap[id] then
-            componentsMap[id] = {}
-        end
-
-        table.insert(componentsMap[id], trait)
+    for _, row in pairs(self._traitMap) do
+        AttachTraitRow(self, entity, row, relevant)
     end
 end
 
 function World.Import(self: Self, ...: Trait)
+    local traits = self._traitMap
+
     for index, trait in { ... } do
         
-        AssertTrait(trait, index)
+        AssertValidTrait(trait, index)
 
         local priority = trait._priority
-        local traits = self._traitMap
 
         if not traits[priority] then
             traits[priority] = {}
@@ -151,11 +253,15 @@ function World.Import(self: Self, ...: Trait)
 
         traits[priority][trait] = true
 
-        IndexComponentsByTrait(self, trait)
+        ArchetypeTraitTransition(self, trait)
     end
 end
 
-function World.Entity(self: Self, ...: ComponentData<unknown>): Entity
+function World.Entity(
+    self: Self,
+    ...: Types.ComponentData<unknown>
+)
+
     local entity = Entity(self)
     self._storage[entity._id] = entity
 
@@ -183,5 +289,6 @@ function World.Despawn(self: Self, ID: number)
 
     entity:Destruct()
 end
+
 
 return NewWorld
