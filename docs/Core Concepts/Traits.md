@@ -8,7 +8,12 @@ Traits are designed to act upon entities when certain criteria are met. For exam
 
 This approach minimizes unnecessary processing and allows the system to respond dynamically to changes in the game or entities' state.
 
-Traits can be anything. Functions to create an instance, a loop for an AI algorithm or even changing a number. If the requirements are no longer meet, they will be removed. When this happen, if the entity meet the requirements again, the trait you be applied once again.
+Traits can be anything. Functions to create an instance, a loop for an AI algorithm or even changing a number.
+
+!!! note "Keep in mind"
+    Traits are applied only once. They do not run when a X component changes, but when X component is added or removed from an entity.
+
+If the requirements are no longer meet, they will be removed. When this happen, if the entity meet the requirements again, the trait you be applied once again.
 
 ### Trait requirements
 
@@ -72,14 +77,9 @@ When a trait is applied, the trait processor is called with the following parame
 
 These parameters provide the necessary context and data for the trait to function correctly.
 
-### Evaluating traits
+### Evaluating Traits
 
-When you perform an action that trigger a trait to be applied inside a trait, the trait will yield until all the traits that were triggered have been applied. This does not mean that yielding traits will cause the current trait to yield indefinitely.
-
-This ensures that all traits that are activated by an action are processed completely before any further actions or evaluations occur.
-
-!!! warning "Trait flow are not handled automatically"
-    If a trait triggers another trait that yields, the current trait will continue executing. This can lead to errors if the triggered trait has not yet completed its operation.
+If a trait triggers another trait that yields, the current trait will continue executing. This can lead to errors if the triggered trait has not yet completed its operation.
 
 ```lua
 local Celesta = require(game.ReplicatedStorage.Celesta)

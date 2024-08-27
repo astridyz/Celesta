@@ -112,7 +112,7 @@ end
 function World._applyTraits(
     self: Self,
     entity: Entity,
-    modified: { number }
+    modified: { ID }
 )
 
     local relevant = getRelevantTraits(self, entity, modified)
