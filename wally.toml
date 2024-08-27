@@ -4,11 +4,11 @@ description = "A event-driven ECS for Roblox applied in a library"
 license = "MIT"
 authors = ["Astrid"]
 version = "0.1.0"
-registry = "https://github.com/astridyz/Celesta"
+registry = "https://github.com/upliftgames/wally-index"
 realm = "shared"
 
 exclude = ["**"]
 include = ["src", "src/*", "default.project.json", "wally.lock", "wally.toml"]
 
 [dev-dependencies]
-TestEZ = "roblox/testez@0.4.2"
+TestEZ = "roblox/testez@0.4.1"

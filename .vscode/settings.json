@@ -1,9 +1,12 @@
 {
-    "luau-lsp.sourcemap.rojoProjectFile": "default.project.json",
+    "luau-lsp.sourcemap.rojoProjectFile": "test.project.json",
     "luau-lsp.sourcemap.autogenerate": true,
     "luau-lsp.types.roblox": true,
     "luau-lsp.fflags.sync": true,
     "luau-lsp.sourcemap.enabled": true,
+    "luau-lsp.types.definitionFiles": [
+        "tests/Testez.d.luau"
+    ],
     
     "yaml.schemas": {
         "https://squidfunk.github.io/mkdocs-material/schema.json": "mkdocs.yml"

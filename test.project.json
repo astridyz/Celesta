@@ -1,13 +1,19 @@
 {
-    "name": "Celesta",
-    "tree": {
-        "$className": "DataModel",
-        "ServerStorage": { "$path": "tests" },
-        "ReplicatedStorage": {
-            "Packages": {
-                "$className": "Folder",
-                "Celesta": { "$path": "src" }
-            }
-        }
-    }
+	"name": "Celesta Tests",
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"$className": "ReplicatedStorage",
+			"$path": "DevPackages",
+			"Celesta": {
+				"$path": "default.project.json"
+			}
+		},
+		"ServerScriptService": {
+			"$className": "ServerScriptService",
+			"Tests": {
+				"$path": "tests"
+			}
+		}
+	}
 }
