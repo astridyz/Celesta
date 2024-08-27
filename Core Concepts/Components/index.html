@@ -424,6 +424,8 @@
       
         
       
+        
+      
     
     
       
@@ -577,6 +579,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../World/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    World
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -692,7 +715,7 @@
 <h3 id="integrating-components-in-systems">Integrating components in systems</h3>
 <p>Components encapsulate specific functionality, making it easy to manage and update parts of the system independently.</p>
 <p>They enable efficient data handling and reactive programming, where systems can automatically respond to changes.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">local</span> <span class="kr">function</span> <span class="nf">exampleTrait</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">world</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="n">velocity</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">local</span> <span class="kr">function</span> <span class="nf">exampleTrait</span><span class="p">(</span><span class="n">velocity</span><span class="p">)</span>
     <span class="kd">local</span> <span class="n">current</span> <span class="o">=</span> <span class="n">velocity</span><span class="p">.</span><span class="n">current</span>
 
     <span class="n">velocity</span><span class="p">:</span><span class="n">Computed</span><span class="p">(</span><span class="kr">function</span><span class="p">(</span><span class="n">use</span><span class="p">)</span>
