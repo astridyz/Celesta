@@ -48,7 +48,7 @@ Components encapsulate specific functionality, making it easy to manage and upda
 They enable efficient data handling and reactive programming, where systems can automatically respond to changes.
 
 ```lua
-local function exampleTrait(entity, world, scope, velocity)
+local function exampleTrait(velocity)
     local current = velocity.current
 
     velocity:Computed(function(use)

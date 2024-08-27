@@ -8,6 +8,8 @@ Traits are designed to act upon entities when certain criteria are met. For exam
 
 This approach minimizes unnecessary processing and allows the system to respond dynamically to changes in the game or entities' state.
 
+Traits can be anything. Functions to create an instance, a loop for an AI algorithm or even changing a number. If the requirements are no longer meet, they will be removed. When this happen, if the entity meet the requirements again, the trait you be applied once again.
+
 ### Trait requirements
 
 ```lua
@@ -72,7 +74,7 @@ These parameters provide the necessary context and data for the trait to functio
 
 ### Evaluating traits
 
-When you perform an action that trigger a trait to be applied inside a trait, the trait will yield until all the traits that were triggered have been applied.
+When you perform an action that trigger a trait to be applied inside a trait, the trait will yield until all the traits that were triggered have been applied. This does not mean that yielding traits will cause the current trait to yield indefinitely.
 
 This ensures that all traits that are activated by an action are processed completely before any further actions or evaluations occur.
 
@@ -90,7 +92,9 @@ return Celesta.Trait(Query, 0, function(entity, world, scope, baseplate)
     entity:Add(Part)
 
     local part = entity:Get(Part)
-    local instance = part.instance:Get() --// instance could be nil because the part is not created yet.
+
+    --// instance could be nil because the part is not created yet.
+    local instance = part.instance:Get()
 
     doSomethingWithPart(instance) --> ERROR
 end)
@@ -123,6 +127,7 @@ local Baseplate = Celesta.Component()
 local Query = Celesta.Query(Part, Baseplate)
 
 return Celesta.Trait(Query, 0, function(entity, world, scope, part)
+
     --// The part is already created before this trait was applied
     local instance = part.instance:Get()
 

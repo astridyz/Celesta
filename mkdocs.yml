@@ -67,6 +67,7 @@ nav:
       - Components: Core Concepts/Components.md
       - Queries: Core Concepts/Queries.md
       - Traits: Core Concepts/Traits.md
+      - World: Core Concepts/World.md
 
 
 markdown_extensions:
