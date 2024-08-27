@@ -1,1 +1,8 @@
+# Wally
+wally.lock
+
+# Rojo
+sourcemap.json
+
+# Mkdocs website output
 /site
