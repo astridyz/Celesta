@@ -270,14 +270,18 @@ function World.Entity(
     return entity
 end
 
-function World.Get(self: Self, ID: number): Entity?
+function World.Get(self: Self, ID: number): Entity
     local entity = self._storage[ID]
 
     if not entity then
-        return
+        error('Entity does not exist. Use World:Contains to check if needed.')
     end
 
     return entity
+end
+
+function World.Contains(self: Self, ID: number): boolean
+    return self._storage[ID] ~= nil
 end
 
 function World.Despawn(self: Self, ID: number)

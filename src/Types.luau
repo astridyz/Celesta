@@ -120,7 +120,8 @@ export type World = {
 
     Import: (self: World, ...Trait) -> (),
     Entity: (self: World, ...ComponentData<unknown>) -> Entity,
-    Get: (self: World, ID: number) -> Entity?,
+    Get: (self: World, ID: number) -> Entity,
+    Contains: (self: World, ID: number) -> boolean,
     Despawn: (self: World, ID: number) -> (),
 }
 

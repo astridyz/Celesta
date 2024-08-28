@@ -68,7 +68,7 @@ function Trait.Remove(self: Self, entity: Entity)
 end
 
 function Trait.isApplied(self: Self, entity: Entity)
-    return self._entityMap[entity._id] and true or false
+    return self._entityMap[entity._id] ~= nil
 end
 
 local function AssertTraitType(object, index: number)
