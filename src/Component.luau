@@ -1,14 +1,12 @@
 --!strict
 local Clean = require(script.Parent.Reactive.Clean)
 local JoinData = require(script.Parent.Utils.JoinData)
-
 local Scoped = require(script.Parent.Reactive.Scoped)
 local Value = require(script.Parent.Reactive.Value)
 local Computed = require(script.Parent.Reactive.Computed)
 
 local Types = require(script.Parent.Types)
-type Self<default> = Types.Component<default>
-
+type Component<D> = Types.Component<D>
 type Merging = Types.Merging
 
 local ID = 0
@@ -37,7 +35,7 @@ local function NewComponent<default>(default: default?): Types.Component<default
 end
 
 function Component.New<default>(
-    self: Self<default>,
+    self: Component<default>,
     mergeData: Merging
 ): default
     
@@ -56,7 +54,7 @@ function Component.New<default>(
     return data
 end
 
-function Component.__call<default>(self: Self<default>, mergeData: Merging): default
+function Component.__call<default>(self: Component<default>, mergeData: Merging): default
     return self:New(mergeData)
 end
 

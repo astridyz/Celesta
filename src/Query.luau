@@ -4,14 +4,11 @@ local AssertComponent = Component.AssertComponent
 
 local Types = require(script.Parent.Types)
 type Query<Q...> = Types.Query<Q...>
-type Self = Query<unknown>
-
 type Component<D> = Types.Component<D>
 
 local Query  = {}
 Query.__index = Query
 
---// Functions
 local function checkAndSolve(
     query: Query<unknown>,
     ...: Component<unknown>
@@ -31,7 +28,7 @@ local function checkAndSolve(
     return field
 end
 
-local function NewQuery(...)
+local function NewQuery<Q...>(...): Query<Q...>
     
     local self = setmetatable({
 
@@ -47,14 +44,18 @@ local function NewQuery(...)
     return self
 end
 
-function Query.No(self: Self, ...: Component<unknown>): Self
+function Query.No(
+    self: Query<unknown>,
+    ...: Component<unknown>
+): Query<unknown>
+
     self._no = checkAndSolve(self, ...)
 
     return self
 end
 
 function Query.Match(
-    self: Self,
+    self: Query<unknown>,
     entityID: number,
     storage: {[unknown]: Types.ComponentData<unknown>}
 ): boolean

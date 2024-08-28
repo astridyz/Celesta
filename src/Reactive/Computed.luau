@@ -4,7 +4,7 @@ local Outdate = require(script.Parent.OutdateAll)
 local Update = require(script.Parent.UpdateAll)
 
 local Types = require(script.Parent.Parent.Types)
-type Self<value> = Types.Computed<value>
+type Computed<value> = Types.Computed<value>
 
 local Computed = {}
 Computed.__index = Computed
@@ -31,7 +31,7 @@ local function NewComputed<value>(
     return self
 end
 
-function Computed._update<value>(self: Self<value>): boolean
+function Computed._update<value>(self: Computed<value>): boolean
 
     if self._updated then return false end
 
@@ -57,8 +57,8 @@ function Computed._update<value>(self: Self<value>): boolean
     local success, newValue = pcall(self._processor, Use)
 
     if not success then
+        
         self:Destruct()
-
         return false
     end
 
@@ -78,7 +78,7 @@ function Computed._update<value>(self: Self<value>): boolean
     return true
 end
 
-function Computed.Get<value>(self: Self<value>): value
+function Computed.Get<value>(self: Computed<value>): value
     self:_update()
     return self._value
 end

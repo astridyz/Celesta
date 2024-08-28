@@ -1,19 +1,14 @@
 --!strict
-local Trait = require(script.Parent.Trait)
-local AssertValidTrait = Trait.AssertTrait
-
 local Entity = require(script.Parent.Entity)
 
 local Types = require(script.Parent.Types)
 type World = Types.World
-type Self = World
-
-type Entity = Types.Entity
 
 type Trait = Types.Trait
 type Archetype = Types.Archetype
 
-export type ID = number
+type Entity = Types.Entity
+type ID = Types.ID
 
 local World = {}
 World.__index = World
@@ -97,7 +92,7 @@ local function ArchetypeTraitTransition(
     local length = #components
 
     if length == 0 then
-        error('Invalid trait query: must have at least 1 component')    
+        error('Invalid trait query: must have at least 1 component', 2)    
     end
 
     local types = {}
@@ -125,7 +120,7 @@ local function ArchetypeTraitTransition(
     end
 
     if table.find(newArchetype.traits, trait) then
-        error('Duplicated trait in archetype: ' .. newArchetype.hash)
+        error('Duplicated trait in archetype: ' .. newArchetype.hash, 2)
     end
 
     table.insert(newArchetype.traits, trait)
@@ -225,7 +220,7 @@ local function AttachTraitRow(
 end
 
 function World._applyTraits(
-    self: Self,
+    self: World,
     entity: Entity,
     modified: { ID }
 )
@@ -238,12 +233,14 @@ function World._applyTraits(
     end
 end
 
-function World.Import(self: Self, ...: Trait)
+function World.Import(self: World, ...: Trait)
     local traits = self._traitMap
 
     for index, trait in { ... } do
-        
-        AssertValidTrait(trait, index)
+
+        if typeof(trait) ~= 'table' then
+            error('Invalid trait at index ' .. index .. ': not a table', 2)
+        end
 
         local priority = trait._priority
 
@@ -258,7 +255,7 @@ function World.Import(self: Self, ...: Trait)
 end
 
 function World.Entity(
-    self: Self,
+    self: World,
     ...: Types.ComponentData<unknown>
 )
 
@@ -270,21 +267,21 @@ function World.Entity(
     return entity
 end
 
-function World.Get(self: Self, ID: number): Entity
+function World.Get(self: World, ID: number): Entity
     local entity = self._storage[ID]
 
     if not entity then
-        error('Entity does not exist. Use World:Contains to check if needed.')
+        error('Entity does not exist. Use World:Contains to check if needed', 2)
     end
 
     return entity
 end
 
-function World.Contains(self: Self, ID: number): boolean
+function World.Contains(self: World, ID: number): boolean
     return self._storage[ID] ~= nil
 end
 
-function World.Despawn(self: Self, ID: number)
+function World.Despawn(self: World, ID: number)
     local entity = self:Get(ID)
 
     if not entity then

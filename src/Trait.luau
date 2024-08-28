@@ -1,23 +1,18 @@
 --!strict
 local Clean = require(script.Parent.Reactive.Clean)
-
 local Scoped = require(script.Parent.Reactive.Scoped)
 
 local Types = require(script.Parent.Types)
 type Trait = Types.Trait
-type Self = Trait
+type World = Types.World
 
 type Entity = Types.Entity
-type World = Types.World
+
 type ComponentData<D> = Types.ComponentData<D>
-
 type Scoped<D> = Types.Scoped<D>
-
-local TRAIT_MARKER = {}
 
 local Trait = {}
 Trait.__index = Trait
-Trait[TRAIT_MARKER] = true
 
 local function NewTrait<Reqs...>(
     Query: Types.Query<Reqs...>,
@@ -36,7 +31,7 @@ local function NewTrait<Reqs...>(
 end
 
 function Trait.Apply(
-    self: Self,
+    self: Trait,
     entity: Entity,
     world: World,
     ...: ComponentData<unknown>
@@ -58,7 +53,7 @@ function Trait.Apply(
     table.insert(entityScope, thread)
 end
 
-function Trait.Remove(self: Self, entity: Entity)
+function Trait.Remove(self: Trait, entity: Entity)
     local id = entity._id
     local scope = self._entityMap[id]
 
@@ -67,24 +62,8 @@ function Trait.Remove(self: Self, entity: Entity)
     self._entityMap[id] = nil
 end
 
-function Trait.isApplied(self: Self, entity: Entity)
+function Trait.isApplied(self: Trait, entity: Entity)
     return self._entityMap[entity._id] ~= nil
 end
 
-local function AssertTraitType(object, index: number)
-    assert(typeof(object) == 'table', 'Trait #' .. index .. ' is invalid: not a table')
-end
-
-local function AssertTrait(object, index: number)
-    AssertTraitType(object, index)
-    
-    local meta = getmetatable(object)
-    assert(meta, 'Trait #' .. index .. ' is invalid: doesnt have metatable.')
-
-    assert(meta[TRAIT_MARKER], 'Trait #' .. index .. ' is invalid: has no marker.')
-end
-
-return {
-    New = NewTrait,
-    AssertTrait = AssertTrait
-}
+return NewTrait

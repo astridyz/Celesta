@@ -4,7 +4,7 @@ local Outdate = require(script.Parent.OutdateAll)
 local Update = require(script.Parent.UpdateAll)
 
 local Types = require(script.Parent.Parent.Types)
-type Self<value> = Types.Value<value>
+type Value<V> = Types.Value<V>
 
 local Value = {}
 Value.__index = Value
@@ -25,7 +25,7 @@ local function NewValue<value>(
 end
 
 function Value.Set<value>(
-    self: Self<value>,
+    self: Value<value>,
     newValue: value,
     force: boolean?
 ): value?
@@ -43,7 +43,7 @@ function Value.Set<value>(
     return newValue
 end
 
-function Value.Get<value>(self: Self<value>): value
+function Value.Get<value>(self: Value<value>): value
     return self._value
 end
 

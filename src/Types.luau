@@ -42,9 +42,10 @@ export type Cleaning = Instance
     | {[unknown]: unknown}
 
 export type Merging = {[string]: unknown}
+export type ID = number
 
 export type Component<default = {}> = {
-    _id: number,
+    _id: ID,
     _default: Merging?,
 
     New: (self: Component<default>, data: Merging?) -> default,
@@ -55,14 +56,14 @@ export type Component<default = {}> = {
 
 export type ComponentData<data> = Scoped<data & {
     _name: string,
-    _id: number,
+    _id: ID,
 
     Value: <value>(scope: Scoped, initialData: value?) -> Value<value>,
     Computed: <value>(scope: Scoped, processor: UseFunction<value>) -> Computed<value>,
     Clean: (scope: Scoped) -> (),
 
 } & typeof(setmetatable(
-    {}, {} :: {_id: number}
+    {}, {} :: {_id: ID}
 ))>
 
 export type Query<querying...> = {
@@ -71,7 +72,7 @@ export type Query<querying...> = {
     _all : { Component<unknown> },
 
     No: (self: Query<querying...>, ...Component<unknown>) -> Query<querying...>,
-    Match: (self: Query<querying...>, entityID: number, storage: {[number]: ComponentData<unknown>}) -> boolean,
+    Match: (self: Query<querying...>, entityID: ID, storage: {[number]: ComponentData<unknown>}) -> boolean,
 
     _: (querying...) -> ()
 }
@@ -89,7 +90,7 @@ export type Trait = {
 } & typeof(setmetatable({}, {}))
 
 export type Entity = {
-    _id: number,
+    _id: ID,
     _world: World,
     _storage: {[number]: ComponentData<unknown>},
 

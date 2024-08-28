@@ -4,7 +4,7 @@ local AssertComponentData = Component.AssertComponentData
 local AssertComponent = Component.AssertComponent
 
 local Types = require(script.Parent.Types)
-type Self = Types.Entity
+type Entity = Types.Entity
 type World = Types.World
 
 type Component<D> = Types.Component<D>
@@ -27,7 +27,7 @@ local function NewEntity(world: World): Types.Entity
     }, Entity) :: any
 end
 
-function Entity.Add(self: Self, ...: ComponentData<unknown>)
+function Entity.Add(self: Entity, ...: ComponentData<unknown>)
     local modified = {}
 
     for index, data in { ... } do
@@ -45,7 +45,7 @@ function Entity.Add(self: Self, ...: ComponentData<unknown>)
     self._world:_applyTraits(self, modified)
 end
 
-function Entity.Remove(self: Self, ...: Component<unknown>)
+function Entity.Remove(self: Entity, ...: Component<unknown>)
     local modified = {}
 
     for index, component in { ... } do
@@ -66,7 +66,7 @@ function Entity.Remove(self: Self, ...: Component<unknown>)
 end
 
 function Entity.Get(
-    self: Self,
+    self: Entity,
     ...: Component<unknown>
 ): ...ComponentData<unknown> | boolean
 
@@ -89,7 +89,7 @@ function Entity.Get(
     return unpack(results)
 end
 
-function Entity.Clear(self: Self)
+function Entity.Clear(self: Entity)
     local modified = {}
 
     for id, data in self._storage do
@@ -105,7 +105,7 @@ function Entity.Clear(self: Self)
     self._world:_applyTraits(self, modified)
 end
 
-function Entity.Destruct(self: Self)
+function Entity.Destruct(self: Entity)
     self:Clear()
 
     self._world._storage[self._id] = nil
