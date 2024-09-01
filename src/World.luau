@@ -1,7 +1,9 @@
 --!strict
-local Entity = require(script.Parent.Entity)
+local Celesta = script.Parent
 
-local Types = require(script.Parent.Types)
+local Entity = require(Celesta.Entity)
+
+local Types = require(Celesta.Types)
 type World = Types.World
 
 type Trait = Types.Trait

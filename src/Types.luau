@@ -1,15 +1,19 @@
 --!strict
-export type dependencySet =  {[UpdateState | (...any) -> ...any]: boolean}
-export type State<value = unknown> = {
+export type State<value = unknown> = UserState & {
     _value: value,
     _scope: Scoped,
-    _dependencySet: dependencySet,
 
     Get: (self: State<value>) -> value,
 }
 
-export type UpdateState = {
+export type dependencySet<state> =  {[state]: (self: any) -> boolean}
+    
+export type UserState = {
+    _dependencySet: dependencySet<UserState>,
     _updated: boolean,
+}
+
+export type UpdateState = {
     _update: (self: UpdateState) -> boolean
 }
 
@@ -23,7 +27,7 @@ export type Value<value> = State<value> & {
 export type Computed<value> = State<value> & UpdateState & {
     _scope: Scoped<any>,
     _processor: UseFunction<unknown>,
-    _listening: { [State]: dependencySet },
+    _listening: { [State]: dependencySet<UserState> },
 
     Destruct: (self: Computed<value>) -> ()
 }
@@ -50,9 +54,7 @@ export type Component<default = {}> = {
 
     New: (self: Component<default>, data: Merging?) -> default,
 
-} & typeof(setmetatable(
-    {}, {} :: { __call: (self: Component<default>, data: Merging?) -> default}
-))
+}
 
 export type ComponentData<data> = Scoped<data & {
     _name: string,
@@ -62,9 +64,7 @@ export type ComponentData<data> = Scoped<data & {
     Computed: <value>(scope: Scoped, processor: UseFunction<value>) -> Computed<value>,
     Clean: (scope: Scoped) -> (),
 
-} & typeof(setmetatable(
-    {}, {} :: {_id: ID}
-))>
+}>
 
 export type Query<querying...> = {
     _no: { Component<unknown> },
@@ -87,7 +87,7 @@ export type Trait = {
     Remove: (self: Trait, entity: Entity) -> (),
     isApplied: (self: Trait, entity: Entity) -> boolean
 
-} & typeof(setmetatable({}, {}))
+}
 
 export type Entity = {
     _id: ID,
@@ -150,4 +150,4 @@ export type QueryConstructor = (<D>(component: Component<D>) -> Query<ComponentD
 & (<D, D1, D2, D3, D4, D5>(component: Component<D>, component2: Component<D1>, component3: Component<D2>, component4: Component<D3>, component5: Component<D4>, component6: Component<D5>) -> Query<ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>, ComponentData<D5>>)
 & (<D, D1, D2, D3, D4, D5, D6>(component: Component<D>, component2: Component<D1>, component3: Component<D2>, component4: Component<D3>, component5: Component<D4>, component6: Component<D5>, component7: Component<D6>) -> Query<ComponentData<D>, ComponentData<D1>, ComponentData<D2>, ComponentData<D3>, ComponentData<D4>, ComponentData<D5>, ComponentData<D6>>)
 
-return 0
+return 0;

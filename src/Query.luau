@@ -1,8 +1,9 @@
 --!strict
-local Component = require(script.Parent.Component)
+local Celesta = script.Parent
+local Component = require(Celesta.Component)
 local AssertComponent = Component.AssertComponent
 
-local Types = require(script.Parent.Types)
+local Types = require(Celesta.Types)
 type Query<Q...> = Types.Query<Q...>
 type Component<D> = Types.Component<D>
 

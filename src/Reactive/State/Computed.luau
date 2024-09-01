@@ -1,9 +1,11 @@
 --!strict
-local Destruct = require(script.Parent.Destruct)
-local Outdate = require(script.Parent.OutdateAll)
-local Update = require(script.Parent.UpdateAll)
+local Package = script.Parent
+local Reactive = Package.Parent
+local State = require(Package)
 
-local Types = require(script.Parent.Parent.Types)
+local Destruct = require(Reactive.Destruct)
+
+local Types = require(Reactive.Parent.Types)
 type Computed<value> = Types.Computed<value>
 
 local Computed = {}
@@ -67,13 +69,13 @@ function Computed._update<value>(self: Computed<value>): boolean
     end
 
     for listening, depSet in oldListening do depSet[self] = nil end
-    for listening, depSet in newListening do depSet[self] = Computed._update :: any end
+    for listening, depSet in newListening do depSet[self] = Computed._update end
     self._listening = newListening
 
-    Outdate(self)
+    State.Outdate(self)
     self._value = newValue :: any
     self._updated = true
-    Update(self)
+    State.Update(self)
     
     return true
 end

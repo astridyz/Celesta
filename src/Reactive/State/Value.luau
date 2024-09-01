@@ -1,9 +1,12 @@
 --!strict
-local Destruct = require(script.Parent.Destruct)
-local Outdate = require(script.Parent.OutdateAll)
-local Update = require(script.Parent.UpdateAll)
+local Package = script.Parent
+local Reactive = Package.Parent
+local State = require(Package)
 
-local Types = require(script.Parent.Parent.Types)
+local Destruct = require(Reactive.Destruct)
+local IsSimilar = require(Reactive.IsSimilar)
+
+local Types = require(Reactive.Parent.Types)
 type Value<V> = Types.Value<V>
 
 local Value = {}
@@ -32,14 +35,14 @@ function Value.Set<value>(
 
     local current = self._value
 
-    if newValue == current and not force then
+    if not force and IsSimilar(newValue, current) then
         return
     end
 
-    Outdate(self)
+    State.Outdate(self)
     self._value = newValue
-    Update(self)
 
+    State.Update(self)
     return newValue
 end
 

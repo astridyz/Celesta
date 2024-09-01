@@ -1,11 +1,14 @@
 --!strict
-local Clean = require(script.Parent.Reactive.Clean)
-local JoinData = require(script.Parent.Utils.JoinData)
-local Scoped = require(script.Parent.Reactive.Scoped)
-local Value = require(script.Parent.Reactive.Value)
-local Computed = require(script.Parent.Reactive.Computed)
+local Celesta = script.Parent
+local Reactive = require(Celesta.Reactive)
 
-local Types = require(script.Parent.Types)
+local Clean = Reactive.Clean
+local Scoped = Reactive.Scoped
+local Value = Reactive.Value
+local Computed = Reactive.Computed
+local JoinData = require(Celesta.Utils.JoinData)
+
+local Types = require(Celesta.Types)
 type Component<D> = Types.Component<D>
 type Merging = Types.Merging
 

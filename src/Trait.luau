@@ -1,8 +1,11 @@
 --!strict
-local Clean = require(script.Parent.Reactive.Clean)
-local Scoped = require(script.Parent.Reactive.Scoped)
+local Celesta = script.Parent
+local Reactive = require(Celesta.Reactive)
 
-local Types = require(script.Parent.Types)
+local Clean = Reactive.Clean
+local Scoped = Reactive.Scoped
+
+local Types = require(Celesta.Types)
 type Trait = Types.Trait
 type World = Types.World
 

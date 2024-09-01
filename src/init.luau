@@ -1,4 +1,5 @@
---!strict
+local Reactive = require(script.Reactive)
+
 local Types = require(script.Types)
 
 export type World = Types.World
@@ -19,12 +20,12 @@ return {
     Query = require(script.Query),
     Component = require(script.Component).New,
 
-    Value = require(script.Reactive.Value),
-    Computed = require(script.Reactive.Computed),
-    Scoped = require(script.Reactive.Scoped),
+    Value = Reactive.Value,
+    Computed = Reactive.Computed,
+    Scoped = Reactive.Scoped,
 
-    Clean = require(script.Reactive.Clean),
-    Destruct = require(script.Reactive.Destruct),
+    Clean = Reactive.Clean,
+    Destruct = Reactive.Destruct,
     
     JoinData = require(script.Utils.JoinData),
 }

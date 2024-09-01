@@ -1,9 +1,10 @@
 --!strict
-local Component = require(script.Parent.Component)
+local Celesta = script.Parent
+local Component = require(Celesta.Component)
 local AssertComponentData = Component.AssertComponentData
 local AssertComponent = Component.AssertComponent
 
-local Types = require(script.Parent.Types)
+local Types = require(Celesta.Types)
 type Entity = Types.Entity
 type World = Types.World
 
@@ -32,9 +33,9 @@ function Entity.Add(self: Entity, ...: ComponentData<unknown>)
 
     for index, data in { ... } do
 
-        AssertComponentData(data, index)
+        AssertComponentData(data :: any, index)
 
-        local metatable = getmetatable(data)
+        local metatable = getmetatable(data :: any)
         local id = metatable._id
 
         self._storage[id] = data :: ComponentData<unknown>
@@ -94,7 +95,7 @@ function Entity.Clear(self: Entity)
 
     for id, data in self._storage do
         
-        AssertComponentData(data, id)
+        AssertComponentData(data :: any, id)
         data:Clean()
 
         table.insert(modified, id)

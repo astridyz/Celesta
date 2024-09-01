@@ -1,7 +1,10 @@
 --!strict
-local JoinData = require(script.Parent.Parent.Utils.JoinData)
+local Reactive = script.Parent
+local Celesta = Reactive.Parent
 
-local Types = require(script.Parent.Parent.Types)
+local JoinData = require(Celesta.Utils.JoinData)
+
+local Types = require(Celesta.Types)
 type Scoped<D> = Types.Scoped<D>
 
 local function Scope(...: {[unknown]: unknown})
