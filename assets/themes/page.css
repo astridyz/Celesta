@@ -18,6 +18,10 @@
     padding: 2rem;
 }
 
+.md-nav__source {
+    background-color: transparent;
+}
+
 .md-footer__inner {
     display: flex;
     justify-content: space-between;

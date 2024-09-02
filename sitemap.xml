@@ -2,42 +2,42 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://astridyz.github.io/Celesta/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <lastmod>2024-09-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://astridyz.github.io/Celesta/Core%20Concepts/Components/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <loc>https://astridyz.github.io/Celesta/Concepts/Components/</loc>
+         <lastmod>2024-09-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://astridyz.github.io/Celesta/Core%20Concepts/Queries/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <loc>https://astridyz.github.io/Celesta/Concepts/Queries/</loc>
+         <lastmod>2024-09-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://astridyz.github.io/Celesta/Core%20Concepts/Traits/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <loc>https://astridyz.github.io/Celesta/Concepts/Traits/</loc>
+         <lastmod>2024-09-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://astridyz.github.io/Celesta/Core%20Concepts/World/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <loc>https://astridyz.github.io/Celesta/Concepts/World/</loc>
+         <lastmod>2024-09-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://astridyz.github.io/Celesta/Learning/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <loc>https://astridyz.github.io/Celesta/Learning/Get%20Started/</loc>
+         <lastmod>2024-09-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://astridyz.github.io/Celesta/Learning/Contributing/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <loc>https://astridyz.github.io/Celesta/Learning/Installing/</loc>
+         <lastmod>2024-09-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://astridyz.github.io/Celesta/Learning/Downloading/</loc>
-         <lastmod>2024-08-27</lastmod>
+         <loc>https://astridyz.github.io/Celesta/Learning/Using/</loc>
+         <lastmod>2024-09-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
