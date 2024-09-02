@@ -1,4 +1,4 @@
-Queries are the backbone of efficient entity management in libraries like Celesta. They enable you to sift through a vast pool of entities and get exactly those that match specific criteria, making your system both powerful and precise.
+Queries are the backbone of efficient entity management in libraries like Celesta. They enable you to sift through a vast pool of entities and get exactly those that match specific criteria.
 
 ### Why Queries Matter
 

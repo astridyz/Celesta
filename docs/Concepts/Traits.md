@@ -2,8 +2,6 @@ In the context of Celesta and similar frameworks, traits function as specialized
 
 ### Understanding Traits
 
-Unlike traditional systems that run continuously, traits are invoked under specific conditions, making them efficient and targeted in their operation.
-
 Traits are designed to act upon entities when certain criteria are met. For example, when an entity acquires a new component or its state changes, the relevant traits are automatically triggered.
 
 This approach minimizes unnecessary processing and allows the system to respond dynamically to changes in the game or entities' state.
@@ -160,3 +158,6 @@ end)
 ```
 
 In this example, any components or data added to the trait’s scope, such as the instance, will be cleaned up when the trait is removed.
+
+!!! quote "A little confusing?"
+    Did not understand very well? Don't worry, new patterns in general are difficult to learn. Once you get used to it, everything gets easy.

@@ -1,21 +1,20 @@
-In Celesta, components are essential data structures associated with entities. They store the various attributes and states that define an entity's behavior and characteristics.
+In Celesta, components are data structures associated with entities. They store the data and states that define an entity's behavior and characteristics.
 
 ### What are Components?
 
-Components are simple data containers attached to entities. They hold specific pieces of information related to an entity, such as position, health, or custom attributes. Components do not contain logic or behavior; instead, they purely represent data.
+Components are simple containers attached to entities. They hold specific pieces of information related to an entity, such as position, health, or custom attributes.
 
 ```lua
 local Celesta = require(game.ReplicatedStorage.Celesta)
 
-local Velocity = Celesta.Component {
-    --// Default data for this component
+local Velocity = Celesta.Component {--// Default data for this component
     current = 16
 }
 ```
 
-Celesta works with reactive data. All data inside components are *values*, *values* are data structures with ``get`` and ``set`` methods.
+Celesta works with reactive data. All data inside components are *values*. *Values* are structures with ``get`` and ``set`` methods.
 
-*Values* allow other structures to work with the changes made to them, enabling dynamic updates and ensuring that any modifications are automatically propagated throughout the system.
+*Values* allow other structures to work with the changes made to them, ensuring that any modifications are automatically propagated throughout the game.
 
 Due to limitations in Luau, the type-checking is not done automatically, so you must type-cast *values* in the data fields.
 
@@ -54,7 +53,6 @@ local function exampleTrait(velocity)
     velocity:Computed(function(use)
         print(use(current))
     end)
-
 end
 ```
 
