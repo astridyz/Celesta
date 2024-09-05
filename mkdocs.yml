@@ -56,19 +56,9 @@ extra_css:
   - assets/themes/code.css
   - assets/themes/admonition.css
 
-nav:
-  - Home: index.md
-  - Learning:
-    - Get Started: Learning/Get Started.md
-    - Installing: Learning/Installing.md
-    - Using: Learning/Using.md
-
-    - Concepts:
-      - Components: Concepts/Components.md
-      - Queries: Concepts/Queries.md
-      - Traits: Concepts/Traits.md
-      - World: Concepts/World.md
-
+plugins:
+  - tags:
+      tags_file: Tags.md
 
 markdown_extensions:
   - pymdownx.superfences
@@ -79,3 +69,18 @@ markdown_extensions:
   - admonition
   - attr_list
   - md_in_html
+
+nav:
+  - Home: index.md
+  - Learning:
+    - Get Started: Learning/Get-Started.md
+    - Installing: Learning/Installing.md
+    - Using: Learning/Using.md
+
+    - Concepts:
+      - Components: Concepts/Components.md
+      - Queries: Concepts/Queries.md
+      - Traits: Concepts/Traits.md
+      - World: Concepts/World.md
+
+  - Tags: Tags.md

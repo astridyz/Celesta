@@ -1,3 +1,8 @@
+---
+tags:
+    - Theory
+---
+
 In Celesta, components are data structures associated with entities. They store the data and states that define an entity's behavior and characteristics.
 
 ### What are Components?

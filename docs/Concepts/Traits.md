@@ -1,3 +1,8 @@
+---
+tags:
+    - Theory
+---
+
 In the context of Celesta and similar frameworks, traits function as specialized systems that encapsulate behavior and logic associated with entities.
 
 ### Understanding Traits

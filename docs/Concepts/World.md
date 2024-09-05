@@ -1,3 +1,8 @@
+---
+tags:
+    - Theory
+---
+
 In ECS systems, the "world" is the central context or container that manages all entities, components, and systems (or in Celesta, traits). It acts as the environment where everything in your game or application exists and interacts.
 
 ### World as a Middleware

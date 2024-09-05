@@ -63,6 +63,15 @@
     background-color: var(--celestadoc-primary);
 }
 
+.md-typeset .md-tag {
+    background-color: transparent;
+}
+
+.md-typeset .md-tag:hover {
+    background-color: transparent !important;
+    color: var(--celestadoc-primary-1) !important;
+}
+
 h1, h2, h3 {
     font-weight: bold !important;
 }
