@@ -34,20 +34,6 @@ local function ArchetypeHash(types: { ID }): Types.Hash
     return table.concat(types, '_')
 end
 
-local function IsTypeSubset(
-    typeSet: { [ID]: boolean },
-    smallTypes : { [ID]: boolean }
-): boolean
-
-    for t in pairs(smallTypes) do
-        if not typeSet[t] then
-            return false
-        end
-    end
-
-    return true
-end
-
 local function ArchetypeCreate(
     world: World,
     types: { ID }
@@ -69,20 +55,6 @@ local function ArchetypeCreate(
     world._archetypeIndex[hash] = newArchetype
 
     return newArchetype
-end
-
-local function ArchetypeTraitMerge(
-    baseArchetype: Archetype,
-    unityArchetype: Archetype 
-)
-
-    for _, trait in ipairs(unityArchetype.traits) do
-        if table.find(baseArchetype.traits, trait) then
-            continue
-        end
-
-        table.insert(baseArchetype.traits, trait)
-    end
 end
 
 local function ArchetypeTraitTransition(
@@ -127,12 +99,6 @@ local function ArchetypeTraitTransition(
 
     table.insert(newArchetype.traits, trait)
 
-    for _, updateArchetype in pairs(world._archetypeIndex) do
-        if IsTypeSubset(updateArchetype.typeSet, newArchetype.typeSet) then
-            ArchetypeTraitMerge(updateArchetype, newArchetype)
-        end
-    end
-
     world._traitArchetypes[trait] = newArchetype
 end
 
@@ -142,31 +108,33 @@ local function GetRelevantTraitsFromArchetype(
 ): { [Trait]: boolean }?
     
     local relevantTraits = {}
-    local firstMap;
+    local markedHashes = {}
 
     for _, id in ipairs(types) do
-        
+
         local map = world._componentsIndex[id]
-
-        if not map then
-            return
-        end
-
-        if firstMap == nil or #firstMap < #map then
-            firstMap = map
-        end
-    end
-
-    for _, hash in ipairs(firstMap) do
         
-        local compatibleArchetype = world._archetypeIndex[hash]
-
-        if #compatibleArchetype.traits == 0 then
+        if not map then
             continue
         end
 
-        for _, trait in ipairs(compatibleArchetype.traits) do
-            relevantTraits[trait] = true
+        for _, hash in ipairs(map) do
+
+            if markedHashes[hash] then
+                continue
+            end
+
+            local compatibleArchetype = world._archetypeIndex[hash]
+    
+            if #compatibleArchetype.traits == 0 then
+                continue
+            end
+    
+            for _, trait in ipairs(compatibleArchetype.traits) do
+                relevantTraits[trait] = true
+            end
+
+            markedHashes[hash] = true
         end
     end
 
