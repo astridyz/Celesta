@@ -3,7 +3,7 @@ name = "astridyz/celesta"
 description = "A event-driven ECS for Roblox applied in a library"
 license = "MIT"
 authors = ["Astrid"]
-version = "1.0.1"
+version = "1.0.2"
 registry = "https://github.com/upliftgames/wally-index"
 realm = "shared"
 
