@@ -48,13 +48,17 @@ export type Cleaning = Instance
 export type Merging = {[string]: unknown}
 export type ID = number
 
-export type Component<default = {}> = {
-    _id: ID,
-    _default: Merging?,
+export type Component<default = {}> = typeof(setmetatable(
+    {} :: {
+        _id: ID,
+        _default: Merging?,
 
-    New: (self: Component<default>, data: Merging?) -> default,
-
-}
+        New: (self: Component<default>, data: Merging?) -> default,
+    },
+    {} :: {
+        __call: (self: Component<default>, data: Merging?) -> default
+    }
+))
 
 export type ComponentData<data> = Scoped<data & {
     _name: string,
@@ -63,7 +67,6 @@ export type ComponentData<data> = Scoped<data & {
     Value: <value>(scope: Scoped, initialData: value?) -> Value<value>,
     Computed: <value>(scope: Scoped, processor: UseFunction<value>) -> Computed<value>,
     Clean: (scope: Scoped) -> (),
-
 }>
 
 export type Query<querying...> = {
@@ -86,7 +89,6 @@ export type Trait = {
     Apply: (self: Trait, entity: Entity, world: World, ...ComponentData<unknown>) -> (),
     Remove: (self: Trait, entity: Entity) -> (),
     isApplied: (self: Trait, entity: Entity) -> boolean
-
 }
 
 export type Entity = {

@@ -1,3 +1,4 @@
+--!strict
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Celesta = require(ReplicatedStorage.Celesta)
 local World = Celesta.World
