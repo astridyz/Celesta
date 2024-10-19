@@ -60,14 +60,14 @@ export type Component<default = {}> = typeof(setmetatable(
     }
 ))
 
-export type ComponentData<data> = Scoped<data & {
+export type ComponentData<data = nil> = data & {
     _name: string,
     _id: ID,
 
     Value: <value>(scope: Scoped, initialData: value?) -> Value<value>,
     Computed: <value>(scope: Scoped, processor: UseFunction<value>) -> Computed<value>,
     Clean: (scope: Scoped) -> (),
-}>
+}
 
 export type Query<querying...> = {
     _no: { Component<unknown> },
@@ -122,7 +122,7 @@ export type World = {
     _applyTraits: (self: World, entity: Entity, modified: { number }) -> (),
 
     Import: (self: World, ...Trait) -> (),
-    Entity: (self: World, ...ComponentData<unknown>) -> Entity,
+    Entity: (self: World, ...Scoped) -> Entity,
     Get: (self: World, ID: number) -> Entity,
     Contains: (self: World, ID: number) -> boolean,
     Despawn: (self: World, ID: number) -> (),
