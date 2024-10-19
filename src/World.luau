@@ -105,7 +105,7 @@ end
 local function GetRelevantTraitsFromArchetype(
     world: World,
     types: { ID }
-): { [Trait]: boolean }?
+): { [Trait]: boolean }
     
     local relevantTraits = {}
     local markedHashes = {}
@@ -119,10 +119,7 @@ local function GetRelevantTraitsFromArchetype(
         end
 
         for _, hash in ipairs(map) do
-
-            if markedHashes[hash] then
-                continue
-            end
+            if markedHashes[hash] then continue end
 
             local compatibleArchetype = world._archetypeIndex[hash]
     
@@ -196,7 +193,7 @@ function World._applyTraits(
 )
 
     local relevant = GetRelevantTraitsFromArchetype(self, modified)
-    if not relevant then return end
+    if #relevant == 0 then return end
 
     for _, row in pairs(self._traitMap) do
         AttachTraitRow(self, entity, row, relevant)
